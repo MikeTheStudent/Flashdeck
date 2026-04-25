@@ -555,12 +555,13 @@
     </div>
 
     <!-- Tab switcher -->
-    <div style="display:flex;gap:8px;margin-bottom:16px">
-      <button id="tabFile" onclick="switchImportTab('file')" style="flex:1;padding:9px;border-radius:10px;border:1px solid var(--accent);background:var(--accent);color:#0f0f13;font-family:'Syne',sans-serif;font-weight:700;font-size:0.82rem;cursor:pointer">📂 File</button>
-      <button id="tabPaste" onclick="switchImportTab('paste')" style="flex:1;padding:9px;border-radius:10px;border:1px solid var(--border);background:var(--surface);color:var(--muted);font-family:'Syne',sans-serif;font-weight:700;font-size:0.82rem;cursor:pointer">📋 Paste text</button>
+    <div style="display:flex;gap:6px;margin-bottom:16px">
+      <button id="tabFile" onclick="switchImportTab('file')" style="flex:1;padding:8px 4px;border-radius:10px;border:1px solid var(--accent);background:var(--accent);color:#0f0f13;font-family:'Syne',sans-serif;font-weight:700;font-size:0.75rem;cursor:pointer">📂 File</button>
+      <button id="tabPaste" onclick="switchImportTab('paste')" style="flex:1;padding:8px 4px;border-radius:10px;border:1px solid var(--border);background:var(--surface);color:var(--muted);font-family:'Syne',sans-serif;font-weight:700;font-size:0.75rem;cursor:pointer">📋 Paste</button>
+      <button id="tabGithub" onclick="switchImportTab('github')" style="flex:1;padding:8px 4px;border-radius:10px;border:1px solid var(--border);background:var(--surface);color:var(--muted);font-family:'Syne',sans-serif;font-weight:700;font-size:0.75rem;cursor:pointer">🐙 GitHub</button>
     </div>
 
-    <!-- FILE TAB — input is visible and full-width for mobile reliability -->
+    <!-- FILE TAB — label directly wraps hidden input for mobile reliability -->
     <div id="importFileTab">
       <label for="fileInput" style="display:flex;flex-direction:column;align-items:center;justify-content:center;width:100%;padding:22px 16px;border:1px dashed var(--border);border-radius:12px;background:var(--surface);color:var(--muted);font-family:'DM Mono',monospace;font-size:0.85rem;cursor:pointer;margin-bottom:14px;gap:8px;transition:all .2s" id="filePickerLabel">
         <span style="font-size:1.8rem">📂</span>
@@ -572,6 +573,20 @@
     <!-- PASTE TAB -->
     <div id="importPasteTab" style="display:none">
       <textarea id="pasteArea" placeholder="Paste your cards here:&#10;O que é alto? | Tall&#10;O que é baixo? | Short" style="width:100%;background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:12px 14px;color:var(--text);font-family:'DM Mono',monospace;font-size:0.82rem;margin-bottom:14px;outline:none;resize:vertical;min-height:130px" oninput="handlePasteInput()"></textarea>
+    </div>
+
+    <!-- GITHUB TAB -->
+    <div id="importGithubTab" style="display:none">
+      <div style="font-size:0.75rem;color:var(--muted);margin-bottom:10px;line-height:1.6">
+        Enter your GitHub username and repo, then pick a deck file to load directly.
+      </div>
+      <div style="display:flex;gap:8px;margin-bottom:10px">
+        <input type="text" id="ghUser" placeholder="username" style="flex:1;background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:10px 12px;color:var(--text);font-family:'DM Mono',monospace;font-size:0.82rem;outline:none"/>
+        <span style="display:flex;align-items:center;color:var(--muted);font-size:0.9rem">/</span>
+        <input type="text" id="ghRepo" placeholder="repo" style="flex:1;background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:10px 12px;color:var(--text);font-family:'DM Mono',monospace;font-size:0.82rem;outline:none"/>
+      </div>
+      <input type="text" id="ghPath" placeholder="folder/filename.txt (e.g. decks/01_greetings.txt)" style="width:100%;background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:10px 12px;color:var(--text);font-family:'DM Mono',monospace;font-size:0.82rem;outline:none;margin-bottom:10px"/>
+      <button onclick="fetchFromGithub()" style="width:100%;padding:12px;background:var(--surface2);border:1px solid var(--border);border-radius:10px;color:var(--text);font-family:'Syne',sans-serif;font-weight:700;font-size:0.85rem;cursor:pointer;transition:all .15s;margin-bottom:14px">Load from GitHub →</button>
     </div>
 
     <label>Deck Name</label>
@@ -788,6 +803,11 @@ function openImportModal() {
   document.getElementById('fileInput').value = '';
   document.getElementById('pasteArea').value = '';
   switchImportTab('file');
+  // Pre-fill GitHub fields if saved
+  const savedUser = localStorage.getItem('fd_gh_user');
+  const savedRepo = localStorage.getItem('fd_gh_repo');
+  if (savedUser) document.getElementById('ghUser').value = savedUser;
+  if (savedRepo) document.getElementById('ghRepo').value = savedRepo;
   document.getElementById('importModal').classList.add('active');
 }
 function closeImportModal() { document.getElementById('importModal').classList.remove('active'); }
@@ -815,11 +835,72 @@ function processFile(file) {
     document.getElementById('importConfirmBtn').disabled = false;
     document.getElementById('importConfirmBtn').style.opacity = '1';
   };
-  reader.readAsText(file);
+  reader.readAsText(file, 'UTF-8');
 }
 
 function handleDragOver(e) {
   e.preventDefault();
+}
+
+function switchImportTab(tab) {
+  // Reset all tab buttons
+  const tabs = { file: 'tabFile', paste: 'tabPaste', github: 'tabGithub' };
+  const panels = { file: 'importFileTab', paste: 'importPasteTab', github: 'importGithubTab' };
+  Object.keys(tabs).forEach(t => {
+    const btn = document.getElementById(tabs[t]);
+    const panel = document.getElementById(panels[t]);
+    if (!btn || !panel) return;
+    const active = t === tab;
+    btn.style.background = active ? 'var(--accent)' : 'var(--surface)';
+    btn.style.color = active ? '#0f0f13' : 'var(--muted)';
+    btn.style.borderColor = active ? 'var(--accent)' : 'var(--border)';
+    panel.style.display = active ? 'block' : 'none';
+  });
+}
+
+function handlePasteInput() {
+  const text = document.getElementById('pasteArea').value;
+  parsedImportCards = parseCardText(text);
+  if (parsedImportCards.length > 0) {
+    const preview = parsedImportCards.slice(0, 4).map(c => `${c.q} → ${c.a}`).join('<br>');
+    document.getElementById('importPreviewText').innerHTML = preview + (parsedImportCards.length > 4 ? `<br><em style="color:var(--muted)">...and ${parsedImportCards.length - 4} more</em>` : '');
+    document.getElementById('importPreview').style.display = 'block';
+    document.getElementById('importConfirmBtn').disabled = false;
+    document.getElementById('importConfirmBtn').style.opacity = '1';
+  } else {
+    document.getElementById('importPreview').style.display = 'none';
+    document.getElementById('importConfirmBtn').disabled = true;
+    document.getElementById('importConfirmBtn').style.opacity = '.4';
+  }
+}
+
+async function fetchFromGithub() {
+  const user = document.getElementById('ghUser').value.trim();
+  const repo = document.getElementById('ghRepo').value.trim();
+  const path = document.getElementById('ghPath').value.trim();
+  if (!user || !repo || !path) { toast('Fill in username, repo and file path'); return; }
+  // Save for next time
+  localStorage.setItem('fd_gh_user', user);
+  localStorage.setItem('fd_gh_repo', repo);
+  const url = `https://raw.githubusercontent.com/${user}/${repo}/main/${path}`;
+  try {
+    toast('Fetching from GitHub...');
+    const res = await fetch(url);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const text = await res.text();
+    parsedImportCards = parseCardText(text);
+    if (parsedImportCards.length === 0) { toast('No valid cards found in file'); return; }
+    const deckName = path.split('/').pop().replace(/\.[^.]+$/, '').replace(/_/g, ' ');
+    document.getElementById('importDeckName').value = deckName;
+    const preview = parsedImportCards.slice(0, 4).map(c => `${c.q} → ${c.a}`).join('<br>');
+    document.getElementById('importPreviewText').innerHTML = preview + (parsedImportCards.length > 4 ? `<br><em style="color:var(--muted)">...and ${parsedImportCards.length - 4} more</em>` : '');
+    document.getElementById('importPreview').style.display = 'block';
+    document.getElementById('importConfirmBtn').disabled = false;
+    document.getElementById('importConfirmBtn').style.opacity = '1';
+    toast(`✅ ${parsedImportCards.length} cards loaded from GitHub`);
+  } catch(e) {
+    toast('Could not fetch file — check the path and make sure the repo is public');
+  }
 }
 
 function confirmImport() {
