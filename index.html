@@ -1,0 +1,978 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0"/>
+<meta name="theme-color" content="#0f0f13"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+<meta name="apple-mobile-web-app-title" content="FlashDeck"/>
+<link rel="manifest" href="manifest.json"/>
+<title>FlashDeck</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:ital,wght@0,300;0,400;1,300&display=swap" rel="stylesheet"/>
+<style>
+  :root {
+    --bg: #0f0f13;
+    --surface: #18181f;
+    --surface2: #22222c;
+    --border: #2e2e3a;
+    --accent: #c8f060;
+    --accent2: #60c8f0;
+    --danger: #f06080;
+    --text: #f0ede8;
+    --muted: #7a7a8a;
+    --radius: 16px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+  body {
+    font-family: 'DM Mono', monospace;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100dvh;
+    display: flex;
+    flex-direction: column;
+    overflow-x: hidden;
+  }
+
+  h1, h2, h3, .deck-name, .nav-title {
+    font-family: 'Syne', sans-serif;
+  }
+
+  /* ── TOP NAV ── */
+  .topnav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--border);
+    background: var(--bg);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .nav-title { font-size: 1.3rem; font-weight: 800; letter-spacing: -0.5px; }
+  .nav-title span { color: var(--accent); }
+  .nav-btn {
+    background: none; border: none; color: var(--muted);
+    font-size: 1.4rem; cursor: pointer; padding: 4px 8px;
+    transition: color .2s;
+  }
+  .nav-btn:hover { color: var(--text); }
+
+  /* ── SCREENS ── */
+  .screen { display: none; flex-direction: column; flex: 1; padding: 20px; }
+  .screen.active { display: flex; }
+
+  /* ── HOME ── */
+  .home-header { margin-bottom: 24px; }
+  .home-header h2 { font-size: 1.1rem; font-weight: 600; color: var(--muted); margin-bottom: 4px; }
+  .home-header p { font-size: 0.8rem; color: var(--muted); }
+
+  .deck-grid { display: flex; flex-direction: column; gap: 12px; flex: 1; }
+
+  .deck-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 18px;
+    cursor: pointer;
+    transition: border-color .2s, transform .15s;
+    position: relative;
+    overflow: hidden;
+  }
+  .deck-card::before {
+    content: '';
+    position: absolute; top: 0; left: 0;
+    width: 4px; height: 100%;
+    background: var(--accent);
+    opacity: 0;
+    transition: opacity .2s;
+  }
+  .deck-card:active { transform: scale(0.98); }
+  .deck-card:hover::before { opacity: 1; }
+
+  .deck-card .deck-name { font-size: 1rem; font-weight: 700; margin-bottom: 6px; }
+  .deck-card .deck-meta { font-size: 0.75rem; color: var(--muted); }
+  .deck-card .deck-actions {
+    position: absolute; top: 14px; right: 14px;
+    display: flex; gap: 8px;
+  }
+  .deck-actions button {
+    background: var(--surface2); border: 1px solid var(--border);
+    color: var(--muted); font-size: 0.75rem; border-radius: 8px;
+    padding: 4px 10px; cursor: pointer; transition: all .15s;
+    font-family: 'DM Mono', monospace;
+  }
+  .deck-actions button:hover { color: var(--text); border-color: var(--accent); }
+  .deck-actions .del-btn:hover { color: var(--danger); border-color: var(--danger); }
+
+  .fab {
+    position: fixed; bottom: 24px; right: 24px;
+    width: 56px; height: 56px;
+    background: var(--accent); color: #0f0f13;
+    border: none; border-radius: 50%;
+    font-size: 1.6rem; cursor: pointer;
+    box-shadow: 0 4px 24px rgba(200,240,96,.35);
+    display: flex; align-items: center; justify-content: center;
+    transition: transform .15s, box-shadow .15s;
+    z-index: 200;
+  }
+  .fab:active { transform: scale(0.92); }
+
+  /* ── DECK DETAIL ── */
+  .deck-detail-header { margin-bottom: 20px; }
+  .deck-detail-header h2 { font-size: 1.4rem; font-weight: 800; margin-bottom: 4px; }
+  .deck-detail-header p { font-size: 0.78rem; color: var(--muted); }
+
+  .mode-buttons { display: flex; gap: 12px; margin-bottom: 28px; }
+  .mode-btn {
+    flex: 1; padding: 14px 0;
+    border-radius: var(--radius); border: 1px solid var(--border);
+    background: var(--surface); color: var(--text);
+    font-family: 'Syne', sans-serif; font-size: 0.9rem; font-weight: 700;
+    cursor: pointer; transition: all .2s;
+    display: flex; flex-direction: column; align-items: center; gap: 6px;
+  }
+  .mode-btn .mode-icon { font-size: 1.6rem; }
+  .mode-btn:hover, .mode-btn.primary {
+    background: var(--accent); color: #0f0f13; border-color: var(--accent);
+  }
+  .mode-btn.secondary:hover {
+    background: var(--accent2); color: #0f0f13; border-color: var(--accent2);
+  }
+
+  .card-list { display: flex; flex-direction: column; gap: 10px; }
+  .card-item {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 12px; padding: 14px;
+    display: flex; justify-content: space-between; align-items: flex-start;
+    gap: 12px;
+  }
+  .card-item-text { flex: 1; }
+  .card-item-q { font-size: 0.85rem; font-weight: 400; margin-bottom: 4px; }
+  .card-item-a { font-size: 0.78rem; color: var(--accent); }
+  .card-item-del {
+    background: none; border: none; color: var(--muted);
+    cursor: pointer; font-size: 1rem; padding: 2px;
+    transition: color .15s; flex-shrink: 0;
+  }
+  .card-item-del:hover { color: var(--danger); }
+
+  /* ── FLASHCARD MODE ── */
+  .study-header {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 20px;
+  }
+  .study-progress { font-size: 0.78rem; color: var(--muted); }
+  .progress-bar {
+    height: 3px; background: var(--border); border-radius: 99px;
+    margin-bottom: 28px; overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%; background: var(--accent);
+    border-radius: 99px; transition: width .4s ease;
+  }
+
+  .flip-container {
+    perspective: 1200px;
+    flex: 1; display: flex; flex-direction: column;
+    min-height: 260px; max-height: 340px;
+    cursor: pointer; margin-bottom: 20px;
+  }
+  .flip-card {
+    width: 100%; height: 100%;
+    position: relative;
+    transform-style: preserve-3d;
+    transition: transform 0.5s cubic-bezier(.4,0,.2,1);
+    border-radius: var(--radius);
+  }
+  .flip-card.flipped { transform: rotateY(180deg); }
+  .flip-face {
+    position: absolute; width: 100%; height: 100%;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+    border-radius: var(--radius);
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    padding: 28px 24px; text-align: center;
+  }
+  .flip-front {
+    background: var(--surface);
+    border: 1px solid var(--border);
+  }
+  .flip-back {
+    background: var(--surface2);
+    border: 1px solid var(--accent);
+    transform: rotateY(180deg);
+  }
+  .flip-label {
+    font-size: 0.7rem; color: var(--muted);
+    text-transform: uppercase; letter-spacing: 2px;
+    margin-bottom: 16px;
+  }
+  .flip-text {
+    font-family: 'Syne', sans-serif;
+    font-size: 1.25rem; font-weight: 700;
+    line-height: 1.4;
+  }
+  .flip-hint {
+    font-size: 0.7rem; color: var(--muted);
+    margin-top: 16px;
+  }
+  .flip-back .flip-text { color: var(--accent); }
+
+  .study-actions { display: flex; gap: 12px; margin-bottom: 20px; }
+  .study-btn {
+    flex: 1; padding: 14px;
+    border-radius: var(--radius); border: 1px solid var(--border);
+    background: var(--surface); color: var(--text);
+    font-family: 'DM Mono', monospace; font-size: 0.85rem;
+    cursor: pointer; transition: all .15s;
+  }
+  .study-btn.good { border-color: var(--accent); color: var(--accent); }
+  .study-btn.bad { border-color: var(--danger); color: var(--danger); }
+  .study-btn:active { transform: scale(0.96); }
+
+  /* ── MULTIPLE CHOICE ── */
+  .mc-question {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 28px 22px;
+    text-align: center;
+    margin-bottom: 24px;
+    min-height: 140px;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+  }
+  .mc-question-label {
+    font-size: 0.7rem; color: var(--muted);
+    text-transform: uppercase; letter-spacing: 2px;
+    margin-bottom: 12px;
+  }
+  .mc-question-text {
+    font-family: 'Syne', sans-serif;
+    font-size: 1.2rem; font-weight: 700; line-height: 1.4;
+  }
+  .mc-options { display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px; }
+  .mc-option {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 12px; padding: 14px 18px;
+    text-align: left; cursor: pointer;
+    font-family: 'DM Mono', monospace; font-size: 0.85rem; color: var(--text);
+    transition: all .15s; display: flex; align-items: center; gap: 12px;
+  }
+  .mc-option:active { transform: scale(0.98); }
+  .mc-option .opt-letter {
+    width: 28px; height: 28px; flex-shrink: 0;
+    border: 1px solid var(--border); border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.75rem; font-weight: 700;
+    transition: all .15s;
+  }
+  .mc-option.correct { border-color: var(--accent); background: rgba(200,240,96,.08); }
+  .mc-option.correct .opt-letter { background: var(--accent); color: #0f0f13; border-color: var(--accent); }
+  .mc-option.wrong { border-color: var(--danger); background: rgba(240,96,128,.08); }
+  .mc-option.wrong .opt-letter { background: var(--danger); color: #fff; border-color: var(--danger); }
+  .mc-option:not(.correct):not(.wrong):hover { border-color: var(--accent2); }
+  .mc-option[disabled] { cursor: default; }
+
+  .mc-next-btn {
+    width: 100%; padding: 15px;
+    background: var(--accent); color: #0f0f13;
+    border: none; border-radius: var(--radius);
+    font-family: 'Syne', sans-serif; font-weight: 700; font-size: 1rem;
+    cursor: pointer; transition: opacity .15s;
+    display: none;
+  }
+  .mc-next-btn.visible { display: block; }
+
+  /* ── RESULTS ── */
+  .results-screen {
+    flex: 1; display: none; flex-direction: column;
+    align-items: center; justify-content: center;
+    padding: 32px 20px; text-align: center;
+  }
+  .results-screen.active { display: flex; }
+  .results-emoji { font-size: 4rem; margin-bottom: 16px; }
+  .results-title { font-size: 1.8rem; font-weight: 800; margin-bottom: 8px; }
+  .results-score { font-size: 1rem; color: var(--muted); margin-bottom: 32px; }
+  .results-score span { color: var(--accent); font-weight: 700; }
+  .results-actions { display: flex; flex-direction: column; gap: 12px; width: 100%; max-width: 320px; }
+  .results-btn {
+    padding: 15px; border-radius: var(--radius);
+    font-family: 'Syne', sans-serif; font-weight: 700; font-size: 0.95rem;
+    cursor: pointer; transition: all .15s; border: 1px solid var(--border);
+  }
+  .results-btn.primary { background: var(--accent); color: #0f0f13; border-color: var(--accent); }
+  .results-btn.secondary { background: var(--surface); color: var(--text); }
+
+  /* ── MODALS ── */
+  .modal-overlay {
+    display: none; position: fixed; inset: 0;
+    background: rgba(0,0,0,.7); backdrop-filter: blur(4px);
+    z-index: 300; align-items: flex-end; justify-content: center;
+  }
+  .modal-overlay.active { display: flex; }
+  .modal {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 20px 20px 0 0;
+    width: 100%; max-width: 540px;
+    padding: 24px 20px 32px;
+    animation: slideUp .3s cubic-bezier(.4,0,.2,1);
+    max-height: 85dvh; overflow-y: auto;
+  }
+  @keyframes slideUp {
+    from { transform: translateY(100%); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+  }
+  .modal-handle {
+    width: 40px; height: 4px; background: var(--border);
+    border-radius: 99px; margin: 0 auto 20px;
+  }
+  .modal h3 { font-size: 1.2rem; font-weight: 800; margin-bottom: 20px; }
+  .modal label { font-size: 0.75rem; color: var(--muted); display: block; margin-bottom: 6px; }
+  .modal input, .modal textarea {
+    width: 100%; background: var(--bg); border: 1px solid var(--border);
+    border-radius: 10px; padding: 12px 14px;
+    color: var(--text); font-family: 'DM Mono', monospace; font-size: 0.85rem;
+    margin-bottom: 16px; outline: none; transition: border-color .15s;
+    resize: vertical;
+  }
+  .modal input:focus, .modal textarea:focus { border-color: var(--accent); }
+  .modal textarea { min-height: 120px; }
+  .modal-actions { display: flex; gap: 10px; margin-top: 8px; }
+  .modal-btn {
+    flex: 1; padding: 13px; border-radius: 12px;
+    font-family: 'Syne', sans-serif; font-weight: 700; font-size: 0.9rem;
+    cursor: pointer; transition: all .15s;
+  }
+  .modal-btn.primary { background: var(--accent); color: #0f0f13; border: none; }
+  .modal-btn.ghost { background: none; border: 1px solid var(--border); color: var(--muted); }
+  .modal-btn.ghost:hover { color: var(--text); border-color: var(--text); }
+
+  .import-hint {
+    font-size: 0.75rem; color: var(--muted);
+    background: var(--bg); border: 1px dashed var(--border);
+    border-radius: 10px; padding: 12px 14px;
+    margin-bottom: 16px; line-height: 1.6;
+  }
+  .import-hint code { color: var(--accent2); }
+
+  .file-drop {
+    border: 1px dashed var(--border); border-radius: 12px;
+    padding: 20px; text-align: center; cursor: pointer;
+    margin-bottom: 16px; transition: all .2s;
+    font-size: 0.8rem; color: var(--muted);
+  }
+  .file-drop:hover, .file-drop.drag { border-color: var(--accent); color: var(--accent); }
+  .file-drop input { display: none; }
+
+  /* Empty state */
+  .empty-state {
+    flex: 1; display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    text-align: center; padding: 40px 20px; color: var(--muted);
+  }
+  .empty-state .empty-icon { font-size: 3rem; margin-bottom: 16px; opacity: .5; }
+  .empty-state p { font-size: 0.85rem; line-height: 1.6; }
+
+  /* Toast */
+  .toast {
+    position: fixed; bottom: 90px; left: 50%; transform: translateX(-50%) translateY(20px);
+    background: var(--surface2); border: 1px solid var(--border);
+    border-radius: 99px; padding: 10px 20px;
+    font-size: 0.8rem; opacity: 0;
+    transition: all .3s; z-index: 500; white-space: nowrap;
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  .back-btn {
+    background: none; border: none; color: var(--muted);
+    font-size: 1.2rem; cursor: pointer; padding: 4px;
+    display: flex; align-items: center; gap: 6px;
+    font-family: 'DM Mono', monospace; font-size: 0.8rem;
+    transition: color .15s;
+  }
+  .back-btn:hover { color: var(--text); }
+
+  /* Shuffle badge */
+  .shuffle-toggle {
+    display: flex; align-items: center; gap: 8px;
+    font-size: 0.75rem; color: var(--muted); cursor: pointer;
+    background: var(--surface2); border: 1px solid var(--border);
+    border-radius: 99px; padding: 6px 12px;
+    transition: all .15s;
+  }
+  .shuffle-toggle.on { color: var(--accent); border-color: var(--accent); }
+
+  .session-info {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 16px; flex-wrap: wrap; gap: 8px;
+  }
+</style>
+</head>
+<body>
+
+<!-- TOP NAV -->
+<nav class="topnav">
+  <div class="nav-title">Flash<span>Deck</span></div>
+  <div style="display:flex;gap:4px">
+    <button class="nav-btn" id="importNavBtn" title="Import deck" onclick="openImportModal()">⬆</button>
+    <button class="nav-btn" id="addDeckBtn" title="New deck" onclick="openNewDeckModal()">＋</button>
+  </div>
+</nav>
+
+<!-- ════════ HOME SCREEN ════════ -->
+<div class="screen active" id="homeScreen">
+  <div class="home-header">
+    <h2>Your Decks</h2>
+    <p>Tap a deck to study · Long-press to edit</p>
+  </div>
+  <div class="deck-grid" id="deckGrid">
+    <!-- decks rendered here -->
+  </div>
+  <div class="empty-state" id="emptyState" style="display:none">
+    <div class="empty-icon">🃏</div>
+    <p>No decks yet.<br>Tap <strong>＋</strong> to create one<br>or import a text file.</p>
+  </div>
+  <button class="fab" onclick="openNewDeckModal()">＋</button>
+</div>
+
+<!-- ════════ DECK DETAIL SCREEN ════════ -->
+<div class="screen" id="deckScreen">
+  <div class="deck-detail-header">
+    <h2 id="deckScreenTitle">—</h2>
+    <p id="deckScreenMeta">—</p>
+  </div>
+  <div class="mode-buttons">
+    <button class="mode-btn primary" onclick="startFlashcards()">
+      <span class="mode-icon">🃏</span>
+      Flashcards
+    </button>
+    <button class="mode-btn secondary" onclick="startMultipleChoice()">
+      <span class="mode-icon">🎯</span>
+      Quiz
+    </button>
+  </div>
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+    <span style="font-size:0.78rem;color:var(--muted)">CARDS IN DECK</span>
+    <button style="background:none;border:1px solid var(--border);color:var(--muted);border-radius:99px;padding:5px 12px;font-size:0.75rem;cursor:pointer;font-family:'DM Mono',monospace" onclick="openAddCardModal()">+ Add card</button>
+  </div>
+  <div class="card-list" id="cardList"></div>
+</div>
+
+<!-- ════════ FLASHCARD STUDY SCREEN ════════ -->
+<div class="screen" id="flashScreen">
+  <div class="study-header">
+    <span class="study-progress" id="flashProgress">1 / 10</span>
+    <div class="shuffle-toggle" id="shuffleToggle" onclick="toggleShuffle()">
+      🔀 <span id="shuffleLabel">Shuffle off</span>
+    </div>
+  </div>
+  <div class="progress-bar"><div class="progress-fill" id="flashProgressBar" style="width:0%"></div></div>
+
+  <div class="flip-container" id="flipContainer" onclick="flipCard()">
+    <div class="flip-card" id="flipCard">
+      <div class="flip-face flip-front">
+        <div class="flip-label">Question</div>
+        <div class="flip-text" id="flashQuestion">—</div>
+        <div class="flip-hint">tap to reveal answer</div>
+      </div>
+      <div class="flip-face flip-back">
+        <div class="flip-label">Answer</div>
+        <div class="flip-text" id="flashAnswer">—</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="study-actions" id="flashActions" style="display:none">
+    <button class="study-btn bad" onclick="markCard(false)">✗ Again</button>
+    <button class="study-btn good" onclick="markCard(true)">✓ Got it</button>
+  </div>
+  <div id="flashNextArea" style="display:none">
+    <button class="study-btn" style="width:100%;border-color:var(--accent2);color:var(--accent2)" onclick="nextFlash()">Next →</button>
+  </div>
+</div>
+
+<!-- ════════ MULTIPLE CHOICE SCREEN ════════ -->
+<div class="screen" id="mcScreen">
+  <div class="study-header">
+    <span class="study-progress" id="mcProgress">1 / 10</span>
+    <div class="shuffle-toggle" id="mcShuffleToggle" onclick="toggleShuffle()">
+      🔀 <span id="mcShuffleLabel">Shuffle off</span>
+    </div>
+  </div>
+  <div class="progress-bar"><div class="progress-fill" id="mcProgressBar" style="width:0%"></div></div>
+
+  <div class="mc-question">
+    <div class="mc-question-label">Question</div>
+    <div class="mc-question-text" id="mcQuestion">—</div>
+  </div>
+
+  <div class="mc-options" id="mcOptions"></div>
+  <button class="mc-next-btn" id="mcNextBtn" onclick="nextMC()">Next →</button>
+</div>
+
+<!-- ════════ RESULTS SCREEN ════════ -->
+<div class="results-screen" id="resultsScreen">
+  <div class="results-emoji" id="resultsEmoji">🎉</div>
+  <div class="results-title" id="resultsTitle">Nice work!</div>
+  <div class="results-score" id="resultsScore"></div>
+  <div class="results-actions">
+    <button class="results-btn primary" id="resultsRetry" onclick="retrySession()">Try Again</button>
+    <button class="results-btn secondary" onclick="goHome()">Back to Decks</button>
+  </div>
+</div>
+
+<!-- ════════ MODAL: NEW DECK ════════ -->
+<div class="modal-overlay" id="newDeckModal">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <h3 id="newDeckModalTitle">New Deck</h3>
+    <label>Deck Name</label>
+    <input type="text" id="newDeckName" placeholder="e.g. PLC Programming"/>
+    <label>Cards (optional — one per line)</label>
+    <div class="import-hint">Format: <code>Question | Answer</code><br>e.g. <code>What is a PLC? | Programmable Logic Controller</code></div>
+    <textarea id="newDeckCards" placeholder="What is a PLC? | Programmable Logic Controller&#10;What does OPC-UA stand for? | Open Platform Communications Unified Architecture"></textarea>
+    <div class="modal-actions">
+      <button class="modal-btn ghost" onclick="closeNewDeckModal()">Cancel</button>
+      <button class="modal-btn primary" onclick="saveDeck()">Create</button>
+    </div>
+  </div>
+</div>
+
+<!-- ════════ MODAL: IMPORT FILE ════════ -->
+<div class="modal-overlay" id="importModal">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <h3>Import from File</h3>
+    <div class="import-hint">
+      Accepts <code>.txt</code> or <code>.csv</code> files.<br>
+      Each line: <code>Question | Answer</code><br>
+      Tab-separated also works: <code>Question[TAB]Answer</code>
+    </div>
+    <div class="file-drop" id="fileDrop" onclick="document.getElementById('fileInput').click()" ondragover="handleDragOver(event)" ondrop="handleFileDrop(event)">
+      <input type="file" id="fileInput" accept=".txt,.csv,.tsv" onchange="handleFileSelect(event)"/>
+      📂 Tap to choose file · or drag & drop
+    </div>
+    <label>Deck Name</label>
+    <input type="text" id="importDeckName" placeholder="Name for this deck"/>
+    <div id="importPreview" style="display:none;margin-bottom:16px">
+      <div style="font-size:0.75rem;color:var(--muted);margin-bottom:6px">PREVIEW</div>
+      <div id="importPreviewText" style="font-size:0.78rem;color:var(--accent2);line-height:1.8"></div>
+    </div>
+    <div class="modal-actions">
+      <button class="modal-btn ghost" onclick="closeImportModal()">Cancel</button>
+      <button class="modal-btn primary" id="importConfirmBtn" onclick="confirmImport()" disabled style="opacity:.4">Import</button>
+    </div>
+  </div>
+</div>
+
+<!-- ════════ MODAL: ADD CARD ════════ -->
+<div class="modal-overlay" id="addCardModal">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <h3>Add Card</h3>
+    <label>Question</label>
+    <input type="text" id="newCardQ" placeholder="Enter question"/>
+    <label>Answer</label>
+    <input type="text" id="newCardA" placeholder="Enter answer"/>
+    <div class="modal-actions">
+      <button class="modal-btn ghost" onclick="closeAddCardModal()">Cancel</button>
+      <button class="modal-btn primary" onclick="saveCard()">Add Card</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ════════ STATE ════════
+let decks = JSON.parse(localStorage.getItem('fd_decks') || '[]');
+let currentDeckId = null;
+let studyQueue = [];
+let studyIndex = 0;
+let studyCorrect = 0;
+let studyMode = 'flash'; // 'flash' | 'mc'
+let shuffleOn = false;
+let isFlipped = false;
+let parsedImportCards = [];
+
+// ════════ UTILS ════════
+function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2); }
+function save() { localStorage.setItem('fd_decks', JSON.stringify(decks)); }
+function shuffle(arr) { return [...arr].sort(() => Math.random() - .5); }
+function getDeck(id) { return decks.find(d => d.id === id); }
+
+function toast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), 2200);
+}
+
+// ════════ NAVIGATION ════════
+function showScreen(id) {
+  document.querySelectorAll('.screen, .results-screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  // Show/hide nav actions
+  const isHome = id === 'homeScreen';
+  document.getElementById('addDeckBtn').style.display = isHome ? '' : 'none';
+  document.getElementById('importNavBtn').style.display = isHome ? '' : 'none';
+}
+
+function goHome() {
+  currentDeckId = null;
+  renderDecks();
+  showScreen('homeScreen');
+}
+
+// Topnav back button injection
+function setBackNav(label, fn) {
+  // Replace left side of nav with back button during study
+  document.querySelector('.nav-title').innerHTML = `<button class="back-btn" onclick="${fn}()">← ${label}</button>`;
+}
+function resetNav() {
+  document.querySelector('.nav-title').innerHTML = 'Flash<span style="color:var(--accent)">Deck</span>';
+}
+
+// ════════ HOME / DECKS ════════
+function renderDecks() {
+  resetNav();
+  const grid = document.getElementById('deckGrid');
+  const empty = document.getElementById('emptyState');
+  if (decks.length === 0) {
+    grid.innerHTML = '';
+    empty.style.display = 'flex';
+    return;
+  }
+  empty.style.display = 'none';
+  grid.innerHTML = decks.map(d => `
+    <div class="deck-card" onclick="openDeck('${d.id}')">
+      <div class="deck-name">${d.name}</div>
+      <div class="deck-meta">${d.cards.length} card${d.cards.length !== 1 ? 's' : ''}</div>
+      <div class="deck-actions" onclick="event.stopPropagation()">
+        <button onclick="deleteDeck('${d.id}')">delete</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function openDeck(id) {
+  currentDeckId = id;
+  const deck = getDeck(id);
+  document.getElementById('deckScreenTitle').textContent = deck.name;
+  document.getElementById('deckScreenMeta').textContent = `${deck.cards.length} cards`;
+  renderCardList(deck);
+  resetNav();
+  showScreen('deckScreen');
+  document.querySelector('.nav-title').innerHTML = `<button class="back-btn" onclick="goHome()">← Decks</button>`;
+  document.getElementById('addDeckBtn').style.display = 'none';
+  document.getElementById('importNavBtn').style.display = 'none';
+}
+
+function renderCardList(deck) {
+  const list = document.getElementById('cardList');
+  if (deck.cards.length === 0) {
+    list.innerHTML = '<div style="font-size:0.8rem;color:var(--muted);padding:20px 0 10px">No cards yet. Add some above!</div>';
+    return;
+  }
+  list.innerHTML = deck.cards.map((c, i) => `
+    <div class="card-item">
+      <div class="card-item-text">
+        <div class="card-item-q">${c.q}</div>
+        <div class="card-item-a">${c.a}</div>
+      </div>
+      <button class="card-item-del" onclick="deleteCard(${i})">✕</button>
+    </div>
+  `).join('');
+}
+
+function deleteDeck(id) {
+  decks = decks.filter(d => d.id !== id);
+  save(); renderDecks();
+  toast('Deck deleted');
+}
+
+function deleteCard(i) {
+  const deck = getDeck(currentDeckId);
+  deck.cards.splice(i, 1);
+  save();
+  document.getElementById('deckScreenMeta').textContent = `${deck.cards.length} cards`;
+  renderCardList(deck);
+}
+
+// ════════ NEW DECK MODAL ════════
+function openNewDeckModal() {
+  document.getElementById('newDeckName').value = '';
+  document.getElementById('newDeckCards').value = '';
+  document.getElementById('newDeckModalTitle').textContent = 'New Deck';
+  document.getElementById('newDeckModal').classList.add('active');
+  setTimeout(() => document.getElementById('newDeckName').focus(), 350);
+}
+function closeNewDeckModal() { document.getElementById('newDeckModal').classList.remove('active'); }
+
+function parseCardText(text) {
+  return text.split('\n')
+    .map(l => l.trim()).filter(Boolean)
+    .map(l => {
+      const sep = l.includes('|') ? '|' : '\t';
+      const [q, ...rest] = l.split(sep);
+      return q && rest.length ? { q: q.trim(), a: rest.join(sep).trim() } : null;
+    }).filter(Boolean);
+}
+
+function saveDeck() {
+  const name = document.getElementById('newDeckName').value.trim();
+  if (!name) { toast('Please enter a deck name'); return; }
+  const cards = parseCardText(document.getElementById('newDeckCards').value);
+  decks.push({ id: uid(), name, cards });
+  save(); closeNewDeckModal(); renderDecks();
+  toast(`Deck "${name}" created with ${cards.length} card(s)`);
+}
+
+// ════════ ADD CARD MODAL ════════
+function openAddCardModal() {
+  document.getElementById('newCardQ').value = '';
+  document.getElementById('newCardA').value = '';
+  document.getElementById('addCardModal').classList.add('active');
+  setTimeout(() => document.getElementById('newCardQ').focus(), 350);
+}
+function closeAddCardModal() { document.getElementById('addCardModal').classList.remove('active'); }
+
+function saveCard() {
+  const q = document.getElementById('newCardQ').value.trim();
+  const a = document.getElementById('newCardA').value.trim();
+  if (!q || !a) { toast('Fill in both fields'); return; }
+  const deck = getDeck(currentDeckId);
+  deck.cards.push({ q, a });
+  save(); closeAddCardModal();
+  document.getElementById('deckScreenMeta').textContent = `${deck.cards.length} cards`;
+  renderCardList(deck);
+  toast('Card added');
+}
+
+// ════════ IMPORT MODAL ════════
+function openImportModal() {
+  parsedImportCards = [];
+  document.getElementById('importDeckName').value = '';
+  document.getElementById('importPreview').style.display = 'none';
+  document.getElementById('importConfirmBtn').disabled = true;
+  document.getElementById('importConfirmBtn').style.opacity = '.4';
+  document.getElementById('fileDrop').textContent = '📂 Tap to choose file · or drag & drop';
+  document.getElementById('fileInput').value = '';
+  document.getElementById('importModal').classList.add('active');
+}
+function closeImportModal() { document.getElementById('importModal').classList.remove('active'); }
+
+function handleDragOver(e) { e.preventDefault(); document.getElementById('fileDrop').classList.add('drag'); }
+function handleFileDrop(e) {
+  e.preventDefault();
+  document.getElementById('fileDrop').classList.remove('drag');
+  const file = e.dataTransfer.files[0];
+  if (file) processFile(file);
+}
+function handleFileSelect(e) { if (e.target.files[0]) processFile(e.target.files[0]); }
+
+function processFile(file) {
+  document.getElementById('importDeckName').value = file.name.replace(/\.[^.]+$/, '');
+  const reader = new FileReader();
+  reader.onload = e => {
+    parsedImportCards = parseCardText(e.target.result);
+    if (parsedImportCards.length === 0) { toast('No valid cards found. Use "Question | Answer" format'); return; }
+    const preview = parsedImportCards.slice(0, 4).map(c => `${c.q} → ${c.a}`).join('<br>');
+    document.getElementById('importPreviewText').innerHTML = preview + (parsedImportCards.length > 4 ? `<br><em style="color:var(--muted)">...and ${parsedImportCards.length - 4} more</em>` : '');
+    document.getElementById('importPreview').style.display = 'block';
+    document.getElementById('fileDrop').innerHTML = `✅ ${parsedImportCards.length} cards loaded`;
+    document.getElementById('importConfirmBtn').disabled = false;
+    document.getElementById('importConfirmBtn').style.opacity = '1';
+  };
+  reader.readAsText(file);
+}
+
+function handleDragOver(e) {
+  e.preventDefault();
+  document.getElementById('fileDrop').classList.add('drag');
+}
+
+function confirmImport() {
+  const name = document.getElementById('importDeckName').value.trim() || 'Imported Deck';
+  decks.push({ id: uid(), name, cards: parsedImportCards });
+  save(); closeImportModal(); renderDecks();
+  toast(`Imported "${name}" — ${parsedImportCards.length} cards`);
+}
+
+// ════════ SHUFFLE ════════
+function toggleShuffle() {
+  shuffleOn = !shuffleOn;
+  ['shuffleToggle','mcShuffleToggle'].forEach(id => {
+    const el = document.getElementById(id);
+    el?.classList.toggle('on', shuffleOn);
+  });
+  document.getElementById('shuffleLabel').textContent = shuffleOn ? 'Shuffle on' : 'Shuffle off';
+  const ml = document.getElementById('mcShuffleLabel');
+  if (ml) ml.textContent = shuffleOn ? 'Shuffle on' : 'Shuffle off';
+}
+
+// ════════ FLASHCARD MODE ════════
+function startFlashcards() {
+  const deck = getDeck(currentDeckId);
+  if (deck.cards.length === 0) { toast('Add some cards first!'); return; }
+  studyMode = 'flash';
+  studyQueue = shuffleOn ? shuffle(deck.cards) : [...deck.cards];
+  studyIndex = 0; studyCorrect = 0;
+  showFlashCard();
+  showScreen('flashScreen');
+  document.querySelector('.nav-title').innerHTML = `<button class="back-btn" onclick="openDeck('${currentDeckId}')">← ${deck.name}</button>`;
+}
+
+function showFlashCard() {
+  const card = studyQueue[studyIndex];
+  isFlipped = false;
+  document.getElementById('flipCard').classList.remove('flipped');
+  document.getElementById('flashQuestion').textContent = card.q;
+  document.getElementById('flashAnswer').textContent = card.a;
+  document.getElementById('flashActions').style.display = 'none';
+  document.getElementById('flashNextArea').style.display = 'none';
+  updateFlashProgress();
+}
+
+function flipCard() {
+  if (isFlipped) return;
+  isFlipped = true;
+  document.getElementById('flipCard').classList.add('flipped');
+  document.getElementById('flashActions').style.display = 'flex';
+}
+
+function markCard(correct) {
+  if (correct) studyCorrect++;
+  document.getElementById('flashActions').style.display = 'none';
+  if (studyIndex < studyQueue.length - 1) {
+    studyIndex++;
+    setTimeout(showFlashCard, 300);
+  } else {
+    showResults();
+  }
+}
+
+function nextFlash() {
+  studyIndex++;
+  if (studyIndex < studyQueue.length) showFlashCard();
+  else showResults();
+}
+
+function updateFlashProgress() {
+  const total = studyQueue.length;
+  const cur = studyIndex + 1;
+  document.getElementById('flashProgress').textContent = `${cur} / ${total}`;
+  document.getElementById('flashProgressBar').style.width = `${(studyIndex / total) * 100}%`;
+}
+
+// ════════ MULTIPLE CHOICE MODE ════════
+function startMultipleChoice() {
+  const deck = getDeck(currentDeckId);
+  if (deck.cards.length < 2) { toast('Need at least 2 cards for quiz mode'); return; }
+  studyMode = 'mc';
+  studyQueue = shuffleOn ? shuffle(deck.cards) : [...deck.cards];
+  studyIndex = 0; studyCorrect = 0;
+  showMCQuestion();
+  showScreen('mcScreen');
+  document.querySelector('.nav-title').innerHTML = `<button class="back-btn" onclick="openDeck('${currentDeckId}')">← ${deck.name}</button>`;
+}
+
+function showMCQuestion() {
+  const card = studyQueue[studyIndex];
+  const total = studyQueue.length;
+  document.getElementById('mcQuestion').textContent = card.q;
+  document.getElementById('mcProgress').textContent = `${studyIndex + 1} / ${total}`;
+  document.getElementById('mcProgressBar').style.width = `${(studyIndex / total) * 100}%`;
+  document.getElementById('mcNextBtn').classList.remove('visible');
+
+  // Build options: correct + 3 random wrong
+  const all = getDeck(currentDeckId).cards;
+  const wrong = shuffle(all.filter(c => c !== card)).slice(0, 3);
+  const options = shuffle([card, ...wrong]);
+  const letters = ['A','B','C','D'];
+
+  document.getElementById('mcOptions').innerHTML = options.map((o, i) => `
+    <button class="mc-option" onclick="answerMC(this, ${o === card})" id="mcOpt${i}">
+      <div class="opt-letter">${letters[i]}</div>
+      <span>${o.a}</span>
+    </button>
+  `).join('');
+}
+
+function answerMC(btn, correct) {
+  // Disable all
+  document.querySelectorAll('.mc-option').forEach(b => b.disabled = true);
+  btn.classList.add(correct ? 'correct' : 'wrong');
+  if (correct) {
+    studyCorrect++;
+  } else {
+    // Reveal correct
+    document.querySelectorAll('.mc-option').forEach(b => {
+      const ans = b.querySelector('span').textContent;
+      if (ans === studyQueue[studyIndex].a) b.classList.add('correct');
+    });
+  }
+  document.getElementById('mcNextBtn').classList.add('visible');
+}
+
+function nextMC() {
+  studyIndex++;
+  if (studyIndex < studyQueue.length) showMCQuestion();
+  else showResults();
+}
+
+// ════════ RESULTS ════════
+function showResults() {
+  const total = studyQueue.length;
+  const pct = Math.round((studyCorrect / total) * 100);
+  document.getElementById('resultsEmoji').textContent = pct >= 80 ? '🎉' : pct >= 50 ? '💪' : '📚';
+  document.getElementById('resultsTitle').textContent = pct >= 80 ? 'Excellent!' : pct >= 50 ? 'Good effort!' : 'Keep studying!';
+  document.getElementById('resultsScore').innerHTML = `<span>${studyCorrect}</span> / ${total} correct &nbsp;·&nbsp; <span>${pct}%</span>`;
+  document.querySelectorAll('.screen, #flashScreen, #mcScreen').forEach(s => s.classList.remove('active'));
+  document.getElementById('resultsScreen').classList.add('active');
+  const deck = getDeck(currentDeckId);
+  document.querySelector('.nav-title').innerHTML = `<button class="back-btn" onclick="openDeck('${currentDeckId}')">← ${deck.name}</button>`;
+}
+
+function retrySession() {
+  if (studyMode === 'flash') startFlashcards();
+  else startMultipleChoice();
+}
+
+// ════════ CLOSE MODALS ON OVERLAY CLICK ════════
+document.querySelectorAll('.modal-overlay').forEach(overlay => {
+  overlay.addEventListener('click', e => {
+    if (e.target === overlay) overlay.classList.remove('active');
+  });
+});
+
+// ════════ KEYBOARD SUPPORT ════════
+document.addEventListener('keydown', e => {
+  if (document.getElementById('flashScreen').classList.contains('active')) {
+    if (e.key === ' ' || e.key === 'Enter') { if (!isFlipped) flipCard(); }
+    if (e.key === 'ArrowRight' && isFlipped) markCard(true);
+    if (e.key === 'ArrowLeft' && isFlipped) markCard(false);
+  }
+});
+
+// ════════ INIT ════════
+renderDecks();
+</script>
+
+<!-- PWA Service Worker registration -->
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('sw.js').catch(() => {});
+  });
+}
+</script>
+</body>
+</html>
