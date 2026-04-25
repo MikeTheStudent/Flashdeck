@@ -178,8 +178,9 @@
   .flip-container {
     perspective: 1200px;
     flex: 1; display: flex; flex-direction: column;
-    min-height: 260px; max-height: 340px;
+    min-height: 260px; max-height: 380px;
     cursor: pointer; margin-bottom: 20px;
+    touch-action: pan-y;
   }
   .flip-card {
     width: 100%; height: 100%;
@@ -196,7 +197,8 @@
     border-radius: var(--radius);
     display: flex; flex-direction: column;
     align-items: center; justify-content: center;
-    padding: 28px 24px; text-align: center;
+    padding: 24px 20px; text-align: center;
+    overflow-y: auto;
   }
   .flip-front {
     background: var(--surface);
@@ -210,18 +212,25 @@
   .flip-label {
     font-size: 0.7rem; color: var(--muted);
     text-transform: uppercase; letter-spacing: 2px;
-    margin-bottom: 16px;
+    margin-bottom: 12px; flex-shrink: 0;
   }
   .flip-text {
     font-family: 'Syne', sans-serif;
-    font-size: 1.25rem; font-weight: 700;
-    line-height: 1.4;
+    font-weight: 700; line-height: 1.4;
+    word-break: break-word;
   }
   .flip-hint {
     font-size: 0.7rem; color: var(--muted);
-    margin-top: 16px;
+    margin-top: 12px; flex-shrink: 0;
   }
   .flip-back .flip-text { color: var(--accent); }
+
+  /* swipe hint arrows */
+  .swipe-hint {
+    display: flex; justify-content: space-between;
+    font-size: 0.7rem; color: var(--muted);
+    padding: 0 4px; margin-bottom: 8px;
+  }
 
   .study-actions { display: flex; gap: 12px; margin-bottom: 20px; }
   .study-btn {
@@ -463,15 +472,22 @@
   .score-dot.learning { background: var(--accent2); }
   .score-dot.learned { background: var(--accent); }
 
-  /* ── DECK SCORE BADGE ── */
+  /* ── DECK SCORE BAR — segmented tricolor ── */
   .deck-score {
-    font-size: 0.7rem; color: var(--muted);
-    display: flex; align-items: center; gap: 6px; margin-top: 6px;
+    font-size: 0.68rem; color: var(--muted);
+    display: flex; align-items: center; gap: 6px; margin-top: 8px;
   }
   .deck-score-fill {
-    flex: 1; height: 3px; background: var(--border); border-radius: 99px; overflow: hidden;
+    flex: 1; height: 5px; background: var(--border);
+    border-radius: 99px; overflow: hidden;
+    display: flex;
   }
-  .deck-score-bar { height: 100%; background: var(--accent); border-radius: 99px; transition: width .4s; }
+  .deck-score-seg {
+    height: 100%; transition: width .5s ease;
+  }
+  .deck-score-seg.new      { background: #60c8f0; }
+  .deck-score-seg.learning { background: #f06080; }
+  .deck-score-seg.learned  { background: #c8f060; }
 </style>
 </head>
 <body>
@@ -553,6 +569,10 @@
   </div>
   <div class="progress-bar"><div class="progress-fill" id="flashProgressBar" style="width:0%"></div></div>
 
+  <div class="swipe-hint" id="swipeHint" style="display:none">
+    <span>← Again</span>
+    <span>Got it →</span>
+  </div>
   <div class="flip-container" id="flipContainer" onclick="flipCard()">
     <div class="flip-card" id="flipCard">
       <div class="flip-face flip-front">
@@ -801,14 +821,24 @@ function renderDecks() {
   empty.style.display = 'none';
   grid.innerHTML = decks.map(d => {
     const s = deckStats(d);
+    const inProgress = s.total - s.learned - s.newCards;
+    const newPct     = s.total ? Math.round((s.newCards  / s.total) * 100) : 0;
+    const learnPct   = s.total ? Math.round((inProgress  / s.total) * 100) : 0;
+    const learnedPct = s.total ? Math.round((s.learned   / s.total) * 100) : 0;
+    const legend = s.total === 0 ? '—' :
+      `🔵 ${s.newCards} new · 🔴 ${inProgress} learning · 🟢 ${s.learned} learned`;
     return `
     <div class="deck-card" onclick="openDeck('${d.id}')">
       <div class="deck-name">${d.name}</div>
-      <div class="deck-meta">${s.total} card${s.total !== 1 ? 's' : ''} · ${s.newCards} new · ${s.learned} learned</div>
+      <div class="deck-meta">${s.total} card${s.total !== 1 ? 's' : ''}</div>
       <div class="deck-score">
-        <span>${s.pct}%</span>
-        <div class="deck-score-fill"><div class="deck-score-bar" style="width:${s.pct}%"></div></div>
+        <div class="deck-score-fill">
+          <div class="deck-score-seg new"      style="width:${newPct}%"></div>
+          <div class="deck-score-seg learning" style="width:${learnPct}%"></div>
+          <div class="deck-score-seg learned"  style="width:${learnedPct}%"></div>
+        </div>
       </div>
+      <div class="deck-meta" style="margin-top:4px;font-size:0.68rem">${legend}</div>
       <div class="deck-actions" onclick="event.stopPropagation()">
         <button onclick="deleteDeck('${d.id}')">delete</button>
       </div>
@@ -1100,8 +1130,19 @@ function showFlashCard() {
   const card = studyQueue[studyIndex];
   isFlipped = false;
   document.getElementById('flipCard').classList.remove('flipped');
+  document.getElementById('swipeHint').style.display = 'none';
+
+  // Dynamic font size based on text length
+  const qLen = card.q.length;
+  const fontSize = qLen > 80 ? '0.9rem' : qLen > 50 ? '1rem' : qLen > 30 ? '1.1rem' : '1.25rem';
+
   document.getElementById('flashQuestion').textContent = card.q;
+  document.getElementById('flashQuestion').style.fontSize = fontSize;
   document.getElementById('flashAnswer').textContent = card.a;
+  const aLen = card.a.length;
+  const aFontSize = aLen > 80 ? '0.9rem' : aLen > 50 ? '1rem' : aLen > 30 ? '1.1rem' : '1.25rem';
+  document.getElementById('flashAnswer').style.fontSize = aFontSize;
+
   document.getElementById('flashActions').style.display = 'none';
   document.getElementById('flashNextArea').style.display = 'none';
   updateFlashProgress();
@@ -1112,6 +1153,7 @@ function flipCard() {
   isFlipped = true;
   document.getElementById('flipCard').classList.add('flipped');
   document.getElementById('flashActions').style.display = 'flex';
+  document.getElementById('swipeHint').style.display = 'flex';
 }
 
 function markCard(correct) {
@@ -1233,6 +1275,30 @@ function resetDeckScores() {
   toast('Scores reset for this deck');
   openDeck(currentDeckId);
 }
+
+// ════════ SWIPE GESTURES ════════
+(function() {
+  let tx = 0, ty = 0, tt = 0;
+  document.addEventListener('touchstart', e => {
+    tx = e.touches[0].clientX; ty = e.touches[0].clientY; tt = Date.now();
+  }, { passive: true });
+  document.addEventListener('touchend', e => {
+    if (!document.getElementById('flashScreen').classList.contains('active')) return;
+    if (!isFlipped) return;
+    const dx = e.changedTouches[0].clientX - tx;
+    const dy = e.changedTouches[0].clientY - ty;
+    const dt = Date.now() - tt;
+    if (Math.abs(dx) < 60 || Math.abs(dy) > Math.abs(dx) * 0.8 || dt > 500) return;
+    const fc = document.getElementById('flipCard');
+    fc.style.transition = 'transform 0.18s ease, opacity 0.18s ease';
+    fc.style.transform = `rotateY(180deg) translateX(${dx > 0 ? 70 : -70}px) rotate(${dx > 0 ? -6 : 6}deg)`;
+    fc.style.opacity = '0';
+    setTimeout(() => {
+      fc.style.transition = ''; fc.style.transform = ''; fc.style.opacity = '';
+      markCard(dx > 0);
+    }, 180);
+  }, { passive: true });
+})();
 
 // ════════ CLOSE MODALS ON OVERLAY CLICK ════════
 document.querySelectorAll('.modal-overlay').forEach(overlay => {
