@@ -1,0 +1,40 @@
+um / uma | one
+dois / duas | two
+três | three
+quatro | four
+cinco | five
+seis | six
+sete | seven
+oito | eight
+nove | nine
+dez | ten
+onze | eleven
+doze | twelve
+vinte | twenty
+trinta | thirty
+quarenta | forty
+cinquenta | fifty
+sessenta | sixty
+setenta | seventy
+oitenta | eighty
+noventa | ninety
+cem | one hundred
+Uma hora tem | sessenta minutos
+Um dia tem | vinte e quatro horas
+Uma semana tem | sete dias
+Um ano tem | doze meses
+Um século tem | cem anos
+de manhã | in the morning (06:00–12:00)
+à tarde / de tarde | in the afternoon (12:00–20:00)
+à noite | in the evening (20:00–24:00)
+de noite | at night (24:00–06:00)
+hoje | today
+ontem | yesterday
+amanhã | tomorrow
+agora | now
+já | already / right now
+ainda | still / yet
+sempre | always
+nunca | never
+normalmente | normally / usually
+às vezes | sometimes

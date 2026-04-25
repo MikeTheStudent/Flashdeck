@@ -1,0 +1,21 @@
+o carro | the car
+o autocarro | the bus
+o metro | the metro / subway
+o comboio | the train
+o táxi | the taxi
+a bicicleta | the bicycle
+o avião | the plane
+o barco | the boat
+a mota | the motorbike
+a pé | on foot
+de carro | by car
+de autocarro | by bus
+de metro | by metro
+de comboio | by train
+de táxi | by taxi
+de bicicleta | by bicycle
+de avião | by plane
+Vou a pé | I'm going on foot
+Apanho o autocarro | I catch / take the bus
+Onde fica a paragem? | Where is the bus stop?
+A que horas parte o comboio? | What time does the train leave?

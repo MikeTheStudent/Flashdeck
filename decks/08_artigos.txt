@@ -1,0 +1,23 @@
+Artigo definido singular masc | o
+Artigo definido singular fem | a
+Artigo definido plural masc | os
+Artigo definido plural fem | as
+Artigo indefinido singular masc | um
+Artigo indefinido singular fem | uma
+Artigo indefinido plural masc | uns
+Artigo indefinido plural fem | umas
+de + o | do
+de + a | da
+de + os | dos
+de + as | das
+em + o | no
+em + a | na
+em + os | nos
+em + as | nas
+a + a | à
+a + o | ao
+por + a | pela
+por + o | pelo
+Ele é do Porto | He is from Porto
+Ela está na escola | She is at school
+Vou ao supermercado | I'm going to the supermarket

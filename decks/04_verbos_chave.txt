@@ -1,0 +1,47 @@
+falar - eu | falo
+falar - tu | falas
+falar - ele / ela | fala
+falar - nós | falamos
+falar - vocês / eles | falam
+morar - eu | moro
+morar - tu | moras
+morar - nós | moramos
+morar - eles | moram
+trabalhar - eu | trabalho
+trabalhar - tu | trabalhas
+trabalhar - ele | trabalha
+trabalhar - nós | trabalhamos
+trabalhar - vocês | trabalham
+estudar - eu | estudo
+estudar - tu | estudas
+estudar - nós | estudamos
+estudar - eles | estudam
+aprender - eu | aprendo
+aprender - tu | aprendes
+aprender - nós | aprendemos
+aprender - eles | aprendem
+compreender - eu | compreendo
+compreender - tu | compreendes
+partir - eu | parto
+partir - tu | partes
+partir - nós | partimos
+partir - eles | partem
+escrever - eu | escrevo
+escrever - tu | escreves
+ver - eu | vejo
+ver - tu | vês
+ver - ele | vê
+ouvir - eu | ouço
+ouvir - tu | ouves
+ouvir - ele | ouve
+comer - eu | como
+comer - tu | comes
+comer - nós | comemos
+beber - eu | bebo
+beber - tu | bebes
+gostar de | to like something
+amar | to love
+pensar | to think
+levar | to take / to carry
+tomar | to take (medicine, shower)
+apanhar | to catch / to get

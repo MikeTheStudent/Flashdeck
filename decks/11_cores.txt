@@ -1,0 +1,13 @@
+vermelho / vermelha | red
+azul | blue
+verde | green
+amarelo / amarela | yellow
+laranja | orange
+roxo / roxa | purple
+rosa | pink
+branco / branca | white
+preto / preta | black
+cinzento / cinzenta | grey
+castanho / castanha | brown
+dourado / dourada | golden
+prateado / prateada | silver

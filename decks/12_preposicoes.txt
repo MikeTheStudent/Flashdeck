@@ -1,0 +1,16 @@
+de | of / from
+em | in / at / on
+para | for / to / in order to
+por | for / by / through
+com | with
+sem | without
+a | to / at
+até | until / up to
+desde | since / from
+entre | between
+sobre | about / on top of
+Ele é de Portugal | He is from Portugal
+Ela trabalha em Lisboa | She works in Lisbon
+Vou ao supermercado | I'm going to the supermarket (a + o = ao)
+Ela passa pela rua | She walks through the street (por + a = pela)
+Estudo na faculdade | I study at the faculty (em + a = na)

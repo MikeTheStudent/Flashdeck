@@ -1,0 +1,20 @@
+ser - eu | sou
+ser - tu | és
+ser - ele / ela / você | é
+ser - nós | somos
+ser - vocês / eles / elas | são
+estar - eu | estou
+estar - tu | estás
+estar - ele / ela / você | está
+estar - nós | estamos
+estar - vocês / eles / elas | estão
+SER usa-se para... | estados permanentes: nacionalidade, origem, profissão
+ESTAR usa-se para... | estados temporários: localização, sentimentos, condições
+Eu sou português | I am Portuguese (ser - permanent)
+Eu estou em Lisboa | I am in Lisbon (estar - temporary location)
+Ela é médica | She is a doctor (ser - profession)
+Ele está doente | He is sick (estar - temporary state)
+De onde és? | Where are you from?
+Eu sou do Porto | I am from Porto
+Onde estás? | Where are you? (informal)
+Ele está no Porto | He is in Porto

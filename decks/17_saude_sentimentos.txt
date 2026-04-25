@@ -1,0 +1,18 @@
+a saúde | health
+Estou bem | I am well
+Não me sinto bem | I don't feel well
+Estou doente | I am sick
+Tenho dores | I have pain
+Tenho dores de cabeça | I have a headache
+Tenho febre | I have a fever
+Estou cansado/a | I am tired
+Estou preocupado/a | I am worried
+Estou feliz | I am happy
+Estou triste | I am sad
+Estou stressado/a | I am stressed
+Comer legumes faz bem à saúde | Eating vegetables is good for your health
+faz bem | it's good for you
+faz mal | it's bad for you
+o hospital | the hospital
+a farmácia | the pharmacy
+o medicamento | the medicine

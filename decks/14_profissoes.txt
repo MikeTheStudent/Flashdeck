@@ -1,0 +1,18 @@
+médico / médica | doctor
+enfermeiro / enfermeira | nurse
+professor / professora | teacher
+engenheiro / engenheira | engineer
+advogado / advogada | lawyer
+arquiteto / arquiteta | architect
+estudante | student
+jornalista | journalist
+ator / atriz | actor / actress
+músico / música | musician
+programador / programadora | programmer
+cozinheiro / cozinheira | cook / chef
+empregado de mesa | waiter
+comerciante | shopkeeper
+diretor / diretora | director / manager
+Qual é a tua profissão? | What is your profession?
+Sou estudante de engenharia | I am an engineering student
+Ele é médico | He is a doctor

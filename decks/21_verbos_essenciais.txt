@@ -1,0 +1,37 @@
+ir - eu | vou
+ir - tu | vais
+ir - ele / ela / você | vai
+ir - nós | vamos
+ir - vocês / eles / elas | vão
+querer - eu | quero
+querer - tu | queres
+querer - ele / ela | quer
+querer - nós | queremos
+querer - vocês / eles | querem
+poder - eu | posso
+poder - tu | podes
+poder - ele / ela | pode
+poder - nós | podemos
+poder - vocês / eles | podem
+saber - eu | sei
+saber - tu | sabes
+saber - ele / ela | sabe
+saber - nós | sabemos
+conhecer - eu | conheço
+conhecer - tu | conheces
+conhecer - ele / ela | conhece
+conhecer - nós | conhecemos
+vir - eu | venho
+vir - tu | vens
+vir - ele / ela | vem
+vir - nós | vimos
+fazer - eu | faço
+fazer - tu | fazes
+fazer - ele / ela | faz
+fazer - nós | fazemos
+fazer - vocês / eles | fazem
+saber vs conhecer | saber = facto / habilidade; conhecer = pessoa / lugar
+Sei falar português | I know how to speak Portuguese (saber)
+Conheço o Porto | I know Porto (conhecer - familiarity)
+Posso ajudar? | Can I help?
+Faço o trabalho de casa | I do the homework

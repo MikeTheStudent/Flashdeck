@@ -1,0 +1,21 @@
+a família | the family
+o pai | the father
+a mãe | the mother
+os pais | the parents
+o filho | the son
+a filha | the daughter
+os filhos | the children
+o irmão | the brother
+a irmã | the sister
+os irmãos | the siblings
+o avô | the grandfather
+a avó | the grandmother
+os avós | the grandparents
+o marido | the husband
+a mulher / a esposa | the wife
+o namorado | the boyfriend
+a namorada | the girlfriend
+o tio | the uncle
+a tia | the aunt
+o primo / a prima | the cousin (masc / fem)
+Tenho um irmão mais novo | I have a younger brother

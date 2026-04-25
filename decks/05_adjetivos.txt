@@ -1,0 +1,30 @@
+alto / alta | tall
+baixo / baixa | short
+magro / magra | thin / slim
+gordo / gorda | fat
+forte | strong
+fraco / fraca | weak
+bonito / bonita | beautiful / handsome
+feio / feia | ugly
+jovem | young
+velho / velha | old
+novo / nova | new / young
+simpático / simpática | nice / friendly
+antipático / antipática | unfriendly
+interessante | interesting
+aborrecido / aborrecida | boring
+bom / boa | good
+mau / má | bad
+rico / rica | rich
+pobre | poor
+caro / cara | expensive
+barato / barata | cheap
+grande | big / large
+pequeno / pequena | small
+comprido / comprida | long
+curto / curta | short (length)
+fácil | easy
+difícil | difficult
+fresco / fresca | fresh
+doce | sweet
+Ela é magra, mas ele é gordo | She is thin, but he is fat

@@ -1,0 +1,23 @@
+Palavras terminadas em vogal → plural | adiciona -s (livro → livros)
+Palavras terminadas em -s, -r, -z → plural | adiciona -es (mês → meses, mulher → mulheres, atriz → atrizes)
+Palavras terminadas em -l → plural | -l muda para -is (jornal → jornais, papel → papéis, espanhol → espanhóis)
+Palavras terminadas em -m → plural | -m muda para -ns (jardim → jardins, homem → homens)
+Palavras terminadas em -ão → plural | pode ser -ãos, -ões, ou -ães (mão → mãos, profissão → profissões, alemão → alemães)
+semana → | semanas
+telefone → | telefones
+táxi → | táxis
+livro → | livros
+museu → | museus
+mês → | meses
+mulher → | mulheres
+atriz → | atrizes
+jornal → | jornais
+papel → | papéis
+espanhol → | espanhóis
+jardim → | jardins
+homem → | homens
+mão → | mãos
+profissão → | profissões
+alemão → | alemães
+difícil → | difíceis
+fácil → | fáceis
