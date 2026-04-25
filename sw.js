@@ -1,4 +1,4 @@
-const CACHE = 'flashdeck-v1';
+const CACHE = 'flashdeck-v3';
 const ASSETS = [
   './index.html',
   './manifest.json',
