@@ -412,6 +412,66 @@
     display: flex; align-items: center; justify-content: space-between;
     margin-bottom: 16px; flex-wrap: wrap; gap: 8px;
   }
+
+  /* ── STATS BAR ── */
+  .stats-bar {
+    display: grid; grid-template-columns: repeat(3, 1fr);
+    gap: 8px; margin-bottom: 20px;
+  }
+  .stat-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 12px; padding: 12px 10px; text-align: center;
+  }
+  .stat-card .stat-num {
+    font-family: 'Syne', sans-serif; font-size: 1.3rem; font-weight: 800;
+    color: var(--accent); display: block; margin-bottom: 2px;
+  }
+  .stat-card .stat-label {
+    font-size: 0.65rem; color: var(--muted); text-transform: uppercase; letter-spacing: 1px;
+  }
+
+  /* ── SURPRISE BUTTON ── */
+  .surprise-btn {
+    width: 100%; padding: 13px; margin-bottom: 12px;
+    background: var(--surface2); border: 1px dashed var(--border);
+    border-radius: var(--radius); color: var(--muted);
+    font-family: 'Syne', sans-serif; font-weight: 700; font-size: 0.88rem;
+    cursor: pointer; transition: all .2s; letter-spacing: 0.3px;
+  }
+  .surprise-btn:hover { border-color: var(--accent2); color: var(--accent2); }
+  .surprise-btn:active { transform: scale(0.98); }
+
+  /* ── FILTER BUTTONS ON DECK SCREEN ── */
+  .filter-row {
+    display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap;
+  }
+  .filter-btn {
+    padding: 7px 14px; border-radius: 99px;
+    border: 1px solid var(--border); background: var(--surface);
+    color: var(--muted); font-family: 'DM Mono', monospace; font-size: 0.75rem;
+    cursor: pointer; transition: all .15s;
+  }
+  .filter-btn.active { border-color: var(--accent); color: var(--accent); background: rgba(200,240,96,.08); }
+  .filter-btn.active-new { border-color: var(--accent2); color: var(--accent2); background: rgba(96,200,240,.08); }
+  .filter-btn.active-learned { border-color: #a78bfa; color: #a78bfa; background: rgba(167,139,250,.08); }
+
+  /* ── SCORE DOTS ON CARD LIST ── */
+  .score-dot {
+    width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; margin-top: 4px;
+  }
+  .score-dot.new { background: var(--muted); }
+  .score-dot.learning { background: var(--accent2); }
+  .score-dot.learned { background: var(--accent); }
+
+  /* ── DECK SCORE BADGE ── */
+  .deck-score {
+    font-size: 0.7rem; color: var(--muted);
+    display: flex; align-items: center; gap: 6px; margin-top: 6px;
+  }
+  .deck-score-fill {
+    flex: 1; height: 3px; background: var(--border); border-radius: 99px; overflow: hidden;
+  }
+  .deck-score-bar { height: 100%; background: var(--accent); border-radius: 99px; transition: width .4s; }
 </style>
 </head>
 <body>
@@ -427,13 +487,26 @@
 
 <!-- ════════ HOME SCREEN ════════ -->
 <div class="screen active" id="homeScreen">
+  <div class="stats-bar" id="statsBar">
+    <div class="stat-card">
+      <span class="stat-num" id="statTotal">0</span>
+      <span class="stat-label">Total Cards</span>
+    </div>
+    <div class="stat-card">
+      <span class="stat-num" id="statLearned">0</span>
+      <span class="stat-label">Learned</span>
+    </div>
+    <div class="stat-card">
+      <span class="stat-num" id="statStreak">0</span>
+      <span class="stat-label">Streak 🔥</span>
+    </div>
+  </div>
+  <button class="surprise-btn" onclick="surpriseMe()">🎲 Surprise me — random deck</button>
   <div class="home-header">
     <h2>Your Decks</h2>
-    <p>Tap a deck to study · Long-press to edit</p>
+    <p>Tap a deck to study</p>
   </div>
-  <div class="deck-grid" id="deckGrid">
-    <!-- decks rendered here -->
-  </div>
+  <div class="deck-grid" id="deckGrid"></div>
   <div class="empty-state" id="emptyState" style="display:none">
     <div class="empty-icon">🃏</div>
     <p>No decks yet.<br>Tap <strong>＋</strong> to create one<br>or import a text file.</p>
@@ -457,8 +530,14 @@
       Quiz
     </button>
   </div>
+  <!-- Filter row -->
+  <div class="filter-row">
+    <button class="filter-btn active" id="filterAll" onclick="setFilter('all')">All cards</button>
+    <button class="filter-btn" id="filterNew" onclick="setFilter('new')">🔵 New only</button>
+    <button class="filter-btn" id="filterLearned" onclick="setFilter('learned')">🟢 Learned only</button>
+  </div>
   <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
-    <span style="font-size:0.78rem;color:var(--muted)">CARDS IN DECK</span>
+    <span style="font-size:0.78rem;color:var(--muted)" id="cardListLabel">CARDS IN DECK</span>
     <button style="background:none;border:1px solid var(--border);color:var(--muted);border-radius:99px;padding:5px 12px;font-size:0.75rem;cursor:pointer;font-family:'DM Mono',monospace" onclick="openAddCardModal()">+ Add card</button>
   </div>
   <div class="card-list" id="cardList"></div>
@@ -524,6 +603,7 @@
   <div class="results-actions">
     <button class="results-btn primary" id="resultsRetry" onclick="retrySession()">Try Again</button>
     <button class="results-btn secondary" onclick="goHome()">Back to Decks</button>
+    <button class="results-btn secondary" style="font-size:0.8rem;color:var(--muted)" onclick="resetDeckScores()">↺ Reset scores for this deck</button>
   </div>
 </div>
 
@@ -630,16 +710,49 @@ let currentDeckId = null;
 let studyQueue = [];
 let studyIndex = 0;
 let studyCorrect = 0;
-let studyMode = 'flash'; // 'flash' | 'mc'
+let studyMode = 'flash';
 let shuffleOn = false;
 let isFlipped = false;
 let parsedImportCards = [];
+let activeFilter = 'all'; // 'all' | 'new' | 'learned'
+
+// ════════ SCORING CONSTANTS ════════
+const LEARNED_THRESHOLD = 3; // correct answers to count as "learned"
 
 // ════════ UTILS ════════
 function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2); }
 function save() { localStorage.setItem('fd_decks', JSON.stringify(decks)); }
 function shuffle(arr) { return [...arr].sort(() => Math.random() - .5); }
 function getDeck(id) { return decks.find(d => d.id === id); }
+
+function isLearned(card) { return (card.correct || 0) >= LEARNED_THRESHOLD; }
+function isNew(card) { return (card.correct || 0) === 0 && (card.seen || 0) === 0; }
+
+function deckStats(deck) {
+  const total = deck.cards.length;
+  const learned = deck.cards.filter(isLearned).length;
+  const newCards = deck.cards.filter(isNew).length;
+  const pct = total ? Math.round((learned / total) * 100) : 0;
+  return { total, learned, newCards, pct };
+}
+
+function globalStats() {
+  let total = 0, learned = 0;
+  decks.forEach(d => { total += d.cards.length; learned += d.cards.filter(isLearned).length; });
+  const streak = parseInt(localStorage.getItem('fd_streak') || '0');
+  return { total, learned, streak };
+}
+
+function updateStreak() {
+  const today = new Date().toDateString();
+  const last = localStorage.getItem('fd_last_study');
+  const streak = parseInt(localStorage.getItem('fd_streak') || '0');
+  if (last === today) return;
+  const yesterday = new Date(Date.now() - 86400000).toDateString();
+  const newStreak = last === yesterday ? streak + 1 : 1;
+  localStorage.setItem('fd_streak', newStreak);
+  localStorage.setItem('fd_last_study', today);
+}
 
 function toast(msg) {
   const el = document.getElementById('toast');
@@ -676,30 +789,47 @@ function resetNav() {
 // ════════ HOME / DECKS ════════
 function renderDecks() {
   resetNav();
+  // Update global stats bar
+  const gs = globalStats();
+  document.getElementById('statTotal').textContent = gs.total;
+  document.getElementById('statLearned').textContent = gs.learned;
+  document.getElementById('statStreak').textContent = gs.streak;
+
   const grid = document.getElementById('deckGrid');
   const empty = document.getElementById('emptyState');
-  if (decks.length === 0) {
-    grid.innerHTML = '';
-    empty.style.display = 'flex';
-    return;
-  }
+  if (decks.length === 0) { grid.innerHTML = ''; empty.style.display = 'flex'; return; }
   empty.style.display = 'none';
-  grid.innerHTML = decks.map(d => `
+  grid.innerHTML = decks.map(d => {
+    const s = deckStats(d);
+    return `
     <div class="deck-card" onclick="openDeck('${d.id}')">
       <div class="deck-name">${d.name}</div>
-      <div class="deck-meta">${d.cards.length} card${d.cards.length !== 1 ? 's' : ''}</div>
+      <div class="deck-meta">${s.total} card${s.total !== 1 ? 's' : ''} · ${s.newCards} new · ${s.learned} learned</div>
+      <div class="deck-score">
+        <span>${s.pct}%</span>
+        <div class="deck-score-fill"><div class="deck-score-bar" style="width:${s.pct}%"></div></div>
+      </div>
       <div class="deck-actions" onclick="event.stopPropagation()">
         <button onclick="deleteDeck('${d.id}')">delete</button>
       </div>
-    </div>
-  `).join('');
+    </div>`;
+  }).join('');
+}
+
+function surpriseMe() {
+  if (decks.length === 0) { toast('No decks yet!'); return; }
+  const deck = decks[Math.floor(Math.random() * decks.length)];
+  openDeck(deck.id);
+  setTimeout(() => toast(`🎲 Studying: ${deck.name}`), 100);
 }
 
 function openDeck(id) {
   currentDeckId = id;
+  activeFilter = 'all';
   const deck = getDeck(id);
   document.getElementById('deckScreenTitle').textContent = deck.name;
-  document.getElementById('deckScreenMeta').textContent = `${deck.cards.length} cards`;
+  updateDeckMeta(deck);
+  setFilter('all');
   renderCardList(deck);
   resetNav();
   showScreen('deckScreen');
@@ -708,21 +838,51 @@ function openDeck(id) {
   document.getElementById('importNavBtn').style.display = 'none';
 }
 
+function updateDeckMeta(deck) {
+  const s = deckStats(deck);
+  document.getElementById('deckScreenMeta').textContent = `${s.total} cards · ${s.learned} learned · ${s.newCards} new`;
+}
+
+function setFilter(f) {
+  activeFilter = f;
+  ['all','new','learned'].forEach(k => {
+    const btn = document.getElementById('filter' + k.charAt(0).toUpperCase() + k.slice(1));
+    if (!btn) return;
+    btn.className = 'filter-btn' + (k === f ? (k === 'new' ? ' active-new' : k === 'learned' ? ' active-learned' : ' active') : '');
+  });
+  const deck = getDeck(currentDeckId);
+  if (deck) renderCardList(deck);
+}
+
+function getFilteredCards(deck) {
+  if (activeFilter === 'new') return deck.cards.filter(isNew);
+  if (activeFilter === 'learned') return deck.cards.filter(isLearned);
+  return deck.cards;
+}
+
 function renderCardList(deck) {
   const list = document.getElementById('cardList');
-  if (deck.cards.length === 0) {
-    list.innerHTML = '<div style="font-size:0.8rem;color:var(--muted);padding:20px 0 10px">No cards yet. Add some above!</div>';
+  const cards = getFilteredCards(deck);
+  const label = document.getElementById('cardListLabel');
+  if (label) label.textContent = activeFilter === 'all' ? 'CARDS IN DECK' : activeFilter === 'new' ? '🔵 NEW CARDS' : '🟢 LEARNED CARDS';
+  if (cards.length === 0) {
+    list.innerHTML = `<div style="font-size:0.8rem;color:var(--muted);padding:20px 0 10px">${activeFilter === 'new' ? 'No new cards — great job!' : activeFilter === 'learned' ? 'No learned cards yet — keep studying!' : 'No cards yet. Add some above!'}</div>`;
     return;
   }
-  list.innerHTML = deck.cards.map((c, i) => `
+  list.innerHTML = cards.map((c, i) => {
+    const realIdx = deck.cards.indexOf(c);
+    const dotClass = isLearned(c) ? 'learned' : isNew(c) ? 'new' : 'learning';
+    const correct = c.correct || 0;
+    return `
     <div class="card-item">
+      <div class="score-dot ${dotClass}"></div>
       <div class="card-item-text">
         <div class="card-item-q">${c.q}</div>
-        <div class="card-item-a">${c.a}</div>
+        <div class="card-item-a">${c.a} <span style="font-size:0.68rem;color:var(--muted);margin-left:6px">✓${correct}</span></div>
       </div>
-      <button class="card-item-del" onclick="deleteCard(${i})">✕</button>
-    </div>
-  `).join('');
+      <button class="card-item-del" onclick="deleteCard(${realIdx})">✕</button>
+    </div>`;
+  }).join('');
 }
 
 function deleteDeck(id) {
@@ -735,7 +895,7 @@ function deleteCard(i) {
   const deck = getDeck(currentDeckId);
   deck.cards.splice(i, 1);
   save();
-  document.getElementById('deckScreenMeta').textContent = `${deck.cards.length} cards`;
+  updateDeckMeta(deck);
   renderCardList(deck);
 }
 
@@ -755,7 +915,7 @@ function parseCardText(text) {
     .map(l => {
       const sep = l.includes('|') ? '|' : '\t';
       const [q, ...rest] = l.split(sep);
-      return q && rest.length ? { q: q.trim(), a: rest.join(sep).trim() } : null;
+      return q && rest.length ? { q: q.trim(), a: rest.join(sep).trim(), correct: 0, seen: 0 } : null;
     }).filter(Boolean);
 }
 
@@ -925,10 +1085,12 @@ function toggleShuffle() {
 // ════════ FLASHCARD MODE ════════
 function startFlashcards() {
   const deck = getDeck(currentDeckId);
-  if (deck.cards.length === 0) { toast('Add some cards first!'); return; }
+  const cards = getFilteredCards(deck);
+  if (cards.length === 0) { toast('No cards match this filter!'); return; }
   studyMode = 'flash';
-  studyQueue = shuffleOn ? shuffle(deck.cards) : [...deck.cards];
+  studyQueue = shuffleOn ? shuffle(cards) : [...cards];
   studyIndex = 0; studyCorrect = 0;
+  updateStreak();
   showFlashCard();
   showScreen('flashScreen');
   document.querySelector('.nav-title').innerHTML = `<button class="back-btn" onclick="openDeck('${currentDeckId}')">← ${deck.name}</button>`;
@@ -953,7 +1115,14 @@ function flipCard() {
 }
 
 function markCard(correct) {
-  if (correct) studyCorrect++;
+  const card = studyQueue[studyIndex];
+  // Persist score to the actual card in the deck
+  card.seen = (card.seen || 0) + 1;
+  if (correct) {
+    card.correct = (card.correct || 0) + 1;
+    studyCorrect++;
+  }
+  save();
   document.getElementById('flashActions').style.display = 'none';
   if (studyIndex < studyQueue.length - 1) {
     studyIndex++;
@@ -979,10 +1148,12 @@ function updateFlashProgress() {
 // ════════ MULTIPLE CHOICE MODE ════════
 function startMultipleChoice() {
   const deck = getDeck(currentDeckId);
-  if (deck.cards.length < 2) { toast('Need at least 2 cards for quiz mode'); return; }
+  const cards = getFilteredCards(deck);
+  if (cards.length < 2) { toast('Need at least 2 cards for quiz mode'); return; }
   studyMode = 'mc';
-  studyQueue = shuffleOn ? shuffle(deck.cards) : [...deck.cards];
+  studyQueue = shuffleOn ? shuffle(cards) : [...cards];
   studyIndex = 0; studyCorrect = 0;
+  updateStreak();
   showMCQuestion();
   showScreen('mcScreen');
   document.querySelector('.nav-title').innerHTML = `<button class="back-btn" onclick="openDeck('${currentDeckId}')">← ${deck.name}</button>`;
@@ -1011,18 +1182,19 @@ function showMCQuestion() {
 }
 
 function answerMC(btn, correct) {
-  // Disable all
   document.querySelectorAll('.mc-option').forEach(b => b.disabled = true);
   btn.classList.add(correct ? 'correct' : 'wrong');
+  const card = studyQueue[studyIndex];
+  card.seen = (card.seen || 0) + 1;
   if (correct) {
+    card.correct = (card.correct || 0) + 1;
     studyCorrect++;
   } else {
-    // Reveal correct
     document.querySelectorAll('.mc-option').forEach(b => {
-      const ans = b.querySelector('span').textContent;
-      if (ans === studyQueue[studyIndex].a) b.classList.add('correct');
+      if (b.querySelector('span').textContent === studyQueue[studyIndex].a) b.classList.add('correct');
     });
   }
+  save();
   document.getElementById('mcNextBtn').classList.add('visible');
 }
 
@@ -1036,9 +1208,12 @@ function nextMC() {
 function showResults() {
   const total = studyQueue.length;
   const pct = Math.round((studyCorrect / total) * 100);
+  const newlyLearned = studyQueue.filter(c => (c.correct || 0) === LEARNED_THRESHOLD).length;
   document.getElementById('resultsEmoji').textContent = pct >= 80 ? '🎉' : pct >= 50 ? '💪' : '📚';
   document.getElementById('resultsTitle').textContent = pct >= 80 ? 'Excellent!' : pct >= 50 ? 'Good effort!' : 'Keep studying!';
-  document.getElementById('resultsScore').innerHTML = `<span>${studyCorrect}</span> / ${total} correct &nbsp;·&nbsp; <span>${pct}%</span>`;
+  let scoreHTML = `<span>${studyCorrect}</span> / ${total} correct &nbsp;·&nbsp; <span>${pct}%</span>`;
+  if (newlyLearned > 0) scoreHTML += `<br><span style="color:var(--accent);font-size:0.85rem">+${newlyLearned} newly learned! 🌟</span>`;
+  document.getElementById('resultsScore').innerHTML = scoreHTML;
   document.querySelectorAll('.screen, #flashScreen, #mcScreen').forEach(s => s.classList.remove('active'));
   document.getElementById('resultsScreen').classList.add('active');
   const deck = getDeck(currentDeckId);
@@ -1048,6 +1223,15 @@ function showResults() {
 function retrySession() {
   if (studyMode === 'flash') startFlashcards();
   else startMultipleChoice();
+}
+
+function resetDeckScores() {
+  const deck = getDeck(currentDeckId);
+  if (!deck) return;
+  deck.cards.forEach(c => { c.correct = 0; c.seen = 0; });
+  save();
+  toast('Scores reset for this deck');
+  openDeck(currentDeckId);
 }
 
 // ════════ CLOSE MODALS ON OVERLAY CLICK ════════
