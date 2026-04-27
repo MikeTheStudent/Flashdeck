@@ -488,6 +488,112 @@
   .deck-score-seg.new      { background: #60c8f0; }
   .deck-score-seg.learning { background: #f06080; }
   .deck-score-seg.learned  { background: #c8f060; }
+  /* ── SPACED REPETITION ── */
+  .review-btn {
+    width: 100%; padding: 15px; margin-bottom: 12px;
+    background: linear-gradient(135deg, #1a1a2e, #16213e);
+    border: 1px solid #60c8f0; border-radius: var(--radius);
+    color: #60c8f0; font-family: 'Syne', sans-serif;
+    font-weight: 800; font-size: 0.95rem; cursor: pointer;
+    transition: all .2s; display: flex;
+    align-items: center; justify-content: center; gap: 10px;
+  }
+  .review-btn:active { transform: scale(0.98); }
+  .review-btn .due-badge {
+    background: #f06080; color: #fff;
+    border-radius: 99px; padding: 2px 10px;
+    font-size: 0.75rem; font-weight: 700;
+  }
+  .review-btn.none { border-color: var(--border); color: var(--muted); }
+
+  .sr-rating-row {
+    display: grid; grid-template-columns: repeat(4,1fr);
+    gap: 8px; margin-bottom: 16px;
+  }
+  .sr-btn {
+    padding: 12px 4px; border-radius: 12px;
+    border: 1px solid var(--border); background: var(--surface);
+    font-family: 'DM Mono', monospace; font-size: 0.72rem;
+    cursor: pointer; transition: all .15s; text-align: center;
+    display: flex; flex-direction: column; gap: 4px; align-items: center;
+  }
+  .sr-btn .sr-icon { font-size: 1.2rem; }
+  .sr-btn .sr-interval { font-size: 0.65rem; color: var(--muted); }
+  .sr-btn[data-q="0"] { border-color: #f06080; color: #f06080; }
+  .sr-btn[data-q="1"] { border-color: #f0a060; color: #f0a060; }
+  .sr-btn[data-q="2"] { border-color: #60c8f0; color: #60c8f0; }
+  .sr-btn[data-q="3"] { border-color: #c8f060; color: #c8f060; }
+  .sr-btn:active { transform: scale(0.96); }
+
+  .sr-next-info {
+    font-size: 0.75rem; color: var(--muted);
+    text-align: center; margin-bottom: 12px;
+  }
+  .sr-next-info span { color: var(--accent2); }
+
+  /* ── DAILY GOAL RING ── */
+  .goal-ring-wrap {
+    display: flex; flex-direction: column; align-items: center;
+    justify-content: center; gap: 4px;
+  }
+  .goal-ring {
+    position: relative; width: 52px; height: 52px;
+  }
+  .goal-ring svg { transform: rotate(-90deg); }
+  .goal-ring .ring-bg  { fill: none; stroke: var(--border); stroke-width: 4; }
+  .goal-ring .ring-fill { fill: none; stroke: var(--accent); stroke-width: 4;
+    stroke-linecap: round; transition: stroke-dashoffset .5s ease; }
+  .goal-ring .ring-text {
+    position: absolute; inset: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Syne', sans-serif; font-size: 0.72rem; font-weight: 800;
+    color: var(--accent);
+  }
+
+  /* ── DAILY CHALLENGE BUTTON ── */
+  .challenge-btn {
+    width: 100%; padding: 15px; margin-bottom: 10px;
+    background: linear-gradient(135deg, #1a0f2e, #2e1a0f);
+    border: 1px solid #f0a060; border-radius: var(--radius);
+    color: #f0a060; font-family: 'Syne', sans-serif;
+    font-weight: 800; font-size: 0.95rem; cursor: pointer;
+    transition: all .2s; display: flex;
+    align-items: center; justify-content: center; gap: 10px;
+  }
+  .challenge-btn:active { transform: scale(0.98); }
+  .challenge-btn.done { border-color: var(--border); color: var(--muted);
+    background: var(--surface); }
+
+  /* ── MIXED DECK MODAL ── */
+  .deck-pick-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px; max-height: 260px; overflow-y: auto; }
+  .deck-pick-item {
+    display: flex; align-items: center; gap: 12px;
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 10px; padding: 12px 14px; cursor: pointer;
+    transition: all .15s;
+  }
+  .deck-pick-item.selected { border-color: var(--accent); background: rgba(200,240,96,.06); }
+  .deck-pick-check {
+    width: 20px; height: 20px; border-radius: 6px;
+    border: 1px solid var(--border); flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.8rem; transition: all .15s;
+  }
+  .deck-pick-item.selected .deck-pick-check {
+    background: var(--accent); border-color: var(--accent); color: #0f0f13;
+  }
+  .deck-pick-name { font-size: 0.85rem; font-weight: 600; }
+  .deck-pick-meta { font-size: 0.72rem; color: var(--muted); }
+
+  /* ── REVERSE MODE TOGGLE on deck screen ── */
+  .reverse-toggle {
+    display: flex; align-items: center; gap: 8px;
+    font-size: 0.75rem; color: var(--muted); cursor: pointer;
+    background: var(--surface2); border: 1px solid var(--border);
+    border-radius: 99px; padding: 6px 12px; transition: all .15s;
+    width: fit-content;
+  }
+  .reverse-toggle.on { color: var(--accent2); border-color: var(--accent2); }
 </style>
 </head>
 <body>
@@ -512,11 +618,28 @@
       <span class="stat-num" id="statLearned">0</span>
       <span class="stat-label">Learned</span>
     </div>
-    <div class="stat-card">
-      <span class="stat-num" id="statStreak">0</span>
-      <span class="stat-label">Streak 🔥</span>
+    <div class="stat-card" style="cursor:pointer" onclick="openGoalModal()" title="Set daily goal">
+      <div class="goal-ring-wrap">
+        <div class="goal-ring">
+          <svg width="52" height="52" viewBox="0 0 52 52">
+            <circle class="ring-bg" cx="26" cy="26" r="21"/>
+            <circle class="ring-fill" id="goalRingFill" cx="26" cy="26" r="21"
+              stroke-dasharray="132" stroke-dashoffset="132"/>
+          </svg>
+          <div class="ring-text" id="goalRingText">0</div>
+        </div>
+        <span class="stat-label">Daily Goal</span>
+      </div>
     </div>
   </div>
+
+  <button class="challenge-btn" id="challengeBtn" onclick="startDailyChallenge()">
+    🏆 Daily Challenge
+  </button>
+  <button class="review-btn" id="reviewBtn" onclick="startSRSession()">
+    🧠 Review due cards <span class="due-badge" id="dueBadge">0</span>
+  </button>
+  <button class="surprise-btn" onclick="openMixedModal()">🔀 Mixed deck session</button>
   <button class="surprise-btn" onclick="surpriseMe()">🎲 Surprise me — random deck</button>
   <div class="home-header">
     <h2>Your Decks</h2>
@@ -553,7 +676,9 @@
     <button class="filter-btn" id="filterLearned" onclick="setFilter('learned')">🟢 Learned only</button>
   </div>
   <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
-    <span style="font-size:0.78rem;color:var(--muted)" id="cardListLabel">CARDS IN DECK</span>
+    <div class="reverse-toggle" id="reverseToggle" onclick="toggleReverse()">
+      ↔️ <span id="reverseLabel">Normal mode</span>
+    </div>
     <button style="background:none;border:1px solid var(--border);color:var(--muted);border-radius:99px;padding:5px 12px;font-size:0.75rem;cursor:pointer;font-family:'DM Mono',monospace" onclick="openAddCardModal()">+ Add card</button>
   </div>
   <div class="card-list" id="cardList"></div>
@@ -593,6 +718,60 @@
   </div>
   <div id="flashNextArea" style="display:none">
     <button class="study-btn" style="width:100%;border-color:var(--accent2);color:var(--accent2)" onclick="nextFlash()">Next →</button>
+  </div>
+</div>
+
+<!-- ════════ SPACED REPETITION SCREEN ════════ -->
+<div class="screen" id="srScreen">
+  <div class="study-header">
+    <span class="study-progress" id="srProgress">1 / 10</span>
+    <span style="font-size:0.72rem;color:var(--muted)">Spaced Review</span>
+  </div>
+  <div class="progress-bar"><div class="progress-fill" id="srProgressBar" style="width:0%"></div></div>
+
+  <div class="swipe-hint" id="srSwipeHint" style="display:none">
+    <span>← Hard</span>
+    <span>Easy →</span>
+  </div>
+  <div class="flip-container" id="srFlipContainer" onclick="srFlipCard()">
+    <div class="flip-card" id="srFlipCard">
+      <div class="flip-face flip-front">
+        <div class="flip-label">Question</div>
+        <div class="flip-text" id="srQuestion">—</div>
+        <div class="flip-hint">tap to reveal answer</div>
+      </div>
+      <div class="flip-face flip-back">
+        <div class="flip-label">Answer</div>
+        <div class="flip-text" id="srAnswer">—</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SR rating buttons — only shown after flip -->
+  <div id="srRatingArea" style="display:none">
+    <div class="sr-next-info" id="srNextInfo"></div>
+    <div class="sr-rating-row">
+      <button class="sr-btn" data-q="0" onclick="rateSR(0)">
+        <span class="sr-icon">😵</span>
+        <span>Blackout</span>
+        <span class="sr-interval" id="srInt0">→ 1d</span>
+      </button>
+      <button class="sr-btn" data-q="1" onclick="rateSR(1)">
+        <span class="sr-icon">😓</span>
+        <span>Hard</span>
+        <span class="sr-interval" id="srInt1">→ 1d</span>
+      </button>
+      <button class="sr-btn" data-q="2" onclick="rateSR(2)">
+        <span class="sr-icon">🙂</span>
+        <span>Good</span>
+        <span class="sr-interval" id="srInt2">→ 3d</span>
+      </button>
+      <button class="sr-btn" data-q="3" onclick="rateSR(3)">
+        <span class="sr-icon">😎</span>
+        <span>Easy</span>
+        <span class="sr-interval" id="srInt3">→ 5d</span>
+      </button>
+    </div>
   </div>
 </div>
 
@@ -720,6 +899,50 @@
   </div>
 </div>
 
+<!-- ════════ MODAL: MIXED DECK ════════ -->
+<div class="modal-overlay" id="mixedModal">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <h3>Mixed Deck Session</h3>
+    <p style="font-size:0.78rem;color:var(--muted);margin-bottom:16px">Pick the decks to mix together</p>
+    <div class="deck-pick-list" id="deckPickList"></div>
+    <div style="display:flex;gap:8px;margin-bottom:14px">
+      <button onclick="selectAllDecks(true)" style="flex:1;padding:8px;background:none;border:1px solid var(--border);border-radius:8px;color:var(--muted);font-size:0.75rem;cursor:pointer;font-family:'DM Mono',monospace">Select all</button>
+      <button onclick="selectAllDecks(false)" style="flex:1;padding:8px;background:none;border:1px solid var(--border);border-radius:8px;color:var(--muted);font-size:0.75rem;cursor:pointer;font-family:'DM Mono',monospace">Clear</button>
+    </div>
+    <label>Study mode</label>
+    <div style="display:flex;gap:8px;margin-bottom:16px">
+      <button id="mixModeFlash" onclick="setMixMode('flash')" style="flex:1;padding:10px;border-radius:10px;border:1px solid var(--accent);background:var(--accent);color:#0f0f13;font-family:'Syne',sans-serif;font-weight:700;font-size:0.82rem;cursor:pointer">🃏 Flashcards</button>
+      <button id="mixModeQuiz" onclick="setMixMode('quiz')" style="flex:1;padding:10px;border-radius:10px;border:1px solid var(--border);background:var(--surface);color:var(--muted);font-family:'Syne',sans-serif;font-weight:700;font-size:0.82rem;cursor:pointer">🎯 Quiz</button>
+    </div>
+    <div class="modal-actions">
+      <button class="modal-btn ghost" onclick="closeMixedModal()">Cancel</button>
+      <button class="modal-btn primary" onclick="startMixedSession()">Start →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ════════ MODAL: DAILY GOAL ════════ -->
+<div class="modal-overlay" id="goalModal">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <h3>Daily Goal</h3>
+    <p style="font-size:0.78rem;color:var(--muted);margin-bottom:20px">How many cards do you want to review each day?</p>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:20px">
+      <button class="modal-btn ghost" style="flex:1;min-width:60px" onclick="setGoal(10)">10</button>
+      <button class="modal-btn ghost" style="flex:1;min-width:60px" onclick="setGoal(20)">20</button>
+      <button class="modal-btn ghost" style="flex:1;min-width:60px" onclick="setGoal(30)">30</button>
+      <button class="modal-btn ghost" style="flex:1;min-width:60px" onclick="setGoal(50)">50</button>
+    </div>
+    <label>Custom amount</label>
+    <input type="number" id="goalInput" placeholder="e.g. 25" min="1" max="500" style="margin-bottom:16px"/>
+    <div class="modal-actions">
+      <button class="modal-btn ghost" onclick="closeGoalModal()">Cancel</button>
+      <button class="modal-btn primary" onclick="saveGoal()">Set Goal</button>
+    </div>
+  </div>
+</div>
+
 <!-- Toast -->
 <div class="toast" id="toast"></div>
 
@@ -793,7 +1016,11 @@ function showScreen(id) {
 
 function goHome() {
   currentDeckId = null;
+  isMixedSession = false;
+  reverseMode = false;
   renderDecks();
+  updateGoalRing();
+  updateChallengeBtn();
   showScreen('homeScreen');
 }
 
@@ -809,11 +1036,11 @@ function resetNav() {
 // ════════ HOME / DECKS ════════
 function renderDecks() {
   resetNav();
-  // Update global stats bar
   const gs = globalStats();
   document.getElementById('statTotal').textContent = gs.total;
   document.getElementById('statLearned').textContent = gs.learned;
   document.getElementById('statStreak').textContent = gs.streak;
+  updateDueBadge();
 
   const grid = document.getElementById('deckGrid');
   const empty = document.getElementById('emptyState');
@@ -855,6 +1082,7 @@ function surpriseMe() {
 
 function openDeck(id) {
   currentDeckId = id;
+  isMixedSession = false;
   activeFilter = 'all';
   const deck = getDeck(id);
   document.getElementById('deckScreenTitle').textContent = deck.name;
@@ -945,7 +1173,7 @@ function parseCardText(text) {
     .map(l => {
       const sep = l.includes('|') ? '|' : '\t';
       const [q, ...rest] = l.split(sep);
-      return q && rest.length ? { q: q.trim(), a: rest.join(sep).trim(), correct: 0, seen: 0 } : null;
+      return q && rest.length ? { q: q.trim(), a: rest.join(sep).trim(), correct: 0, seen: 0, sr_due: todayStart(), sr_interval: 1, sr_ease: 2.5, sr_reps: 0 } : null;
     }).filter(Boolean);
 }
 
@@ -1100,6 +1328,201 @@ function confirmImport() {
   toast(`Imported "${name}" — ${parsedImportCards.length} cards`);
 }
 
+// ════════ SPACED REPETITION — SM-2 ════════
+
+const MS_PER_DAY = 86400000;
+
+function todayStart() {
+  const d = new Date(); d.setHours(0,0,0,0); return d.getTime();
+}
+
+// SM-2 algorithm — returns updated card fields
+function sm2(card, quality) {
+  // quality: 0=blackout, 1=hard, 2=good, 3=easy
+  let { sr_interval=1, sr_ease=2.5, sr_reps=0 } = card;
+
+  if (quality < 1) {
+    // Blackout — reset
+    sr_reps = 0; sr_interval = 1;
+  } else if (quality === 1) {
+    // Hard — short interval, ease drops
+    sr_reps = Math.max(0, sr_reps - 1);
+    sr_interval = Math.max(1, Math.round(sr_interval * 0.8));
+    sr_ease = Math.max(1.3, sr_ease - 0.2);
+  } else {
+    // Good or easy
+    if (sr_reps === 0) sr_interval = 1;
+    else if (sr_reps === 1) sr_interval = 3;
+    else sr_interval = Math.round(sr_interval * sr_ease);
+    sr_reps++;
+    if (quality === 3) {
+      sr_ease = Math.min(3.0, sr_ease + 0.1);
+      sr_interval = Math.round(sr_interval * 1.3);
+    }
+    sr_ease = Math.max(1.3, sr_ease + 0.1 - (3 - quality) * (0.08 + (3 - quality) * 0.02));
+  }
+
+  const sr_due = todayStart() + sr_interval * MS_PER_DAY;
+  return { sr_interval, sr_ease, sr_reps, sr_due };
+}
+
+// Preview next intervals without mutating
+function previewIntervals(card) {
+  return [0,1,2,3].map(q => sm2({...card}, q).sr_interval);
+}
+
+function formatInterval(days) {
+  if (days === 1) return '→ tomorrow';
+  if (days < 7) return `→ ${days}d`;
+  if (days < 30) return `→ ${Math.round(days/7)}w`;
+  return `→ ${Math.round(days/30)}mo`;
+}
+
+// Get all due cards across all decks
+function getDueCards() {
+  const now = todayStart();
+  const due = [];
+  decks.forEach(deck => {
+    deck.cards.forEach(card => {
+      const dueDate = card.sr_due || 0;
+      if (dueDate <= now) due.push({ card, deck });
+    });
+  });
+  return due;
+}
+
+// Count due cards
+function countDue() {
+  return getDueCards().length;
+}
+
+// SR session state
+let srQueue = [];
+let srIndex = 0;
+let srCorrect = 0;
+let srIsFlipped = false;
+
+function startSRSession() {
+  const due = getDueCards();
+  if (due.length === 0) { toast('No cards due today! Come back tomorrow 🎉'); return; }
+  srQueue = shuffle(due); // shuffle so not always same order
+  srIndex = 0; srCorrect = 0; srIsFlipped = false;
+  updateStreak();
+  showSRCard();
+  showScreen('srScreen');
+  document.querySelector('.nav-title').innerHTML = `<button class="back-btn" onclick="goHome()">← Home</button>`;
+  document.getElementById('addDeckBtn').style.display = 'none';
+  document.getElementById('importNavBtn').style.display = 'none';
+}
+
+function showSRCard() {
+  const { card } = srQueue[srIndex];
+  srIsFlipped = false;
+  document.getElementById('srFlipCard').classList.remove('flipped');
+  document.getElementById('srRatingArea').style.display = 'none';
+  document.getElementById('srSwipeHint').style.display = 'none';
+
+  const qLen = card.q.length;
+  const fs = qLen > 80 ? '0.9rem' : qLen > 50 ? '1rem' : qLen > 30 ? '1.1rem' : '1.25rem';
+  document.getElementById('srQuestion').textContent = card.q;
+  document.getElementById('srQuestion').style.fontSize = fs;
+  const aLen = card.a.length;
+  const aFs = aLen > 80 ? '0.9rem' : aLen > 50 ? '1rem' : aLen > 30 ? '1.1rem' : '1.25rem';
+  document.getElementById('srAnswer').textContent = card.a;
+  document.getElementById('srAnswer').style.fontSize = aFs;
+
+  const total = srQueue.length;
+  document.getElementById('srProgress').textContent = `${srIndex + 1} / ${total}`;
+  document.getElementById('srProgressBar').style.width = `${(srIndex / total) * 100}%`;
+}
+
+function srFlipCard() {
+  if (srIsFlipped) return;
+  srIsFlipped = true;
+  document.getElementById('srFlipCard').classList.add('flipped');
+  document.getElementById('srRatingArea').style.display = 'block';
+  document.getElementById('srSwipeHint').style.display = 'flex';
+
+  // Show preview intervals on buttons
+  const { card } = srQueue[srIndex];
+  const intervals = previewIntervals(card);
+  [0,1,2,3].forEach(q => {
+    const el = document.getElementById(`srInt${q}`);
+    if (el) el.textContent = formatInterval(intervals[q]);
+  });
+}
+
+function rateSR(quality) {
+  const { card, deck } = srQueue[srIndex];
+
+  // Apply SM-2
+  const updates = sm2(card, quality);
+  Object.assign(card, updates);
+
+  // Also update seen/correct for existing score system
+  card.seen = (card.seen || 0) + 1;
+  if (quality >= 2) {
+    card.correct = (card.correct || 0) + 1;
+    srCorrect++;
+  }
+  save();
+
+  if (srIndex < srQueue.length - 1) {
+    srIndex++;
+    setTimeout(showSRCard, 280);
+  } else {
+    showSRResults();
+  }
+}
+
+function showSRResults() {
+  const total = srQueue.length;
+  const pct = Math.round((srCorrect / total) * 100);
+  document.getElementById('resultsEmoji').textContent = pct >= 80 ? '🧠' : pct >= 50 ? '💪' : '📚';
+  document.getElementById('resultsTitle').textContent = pct >= 80 ? 'Great review!' : pct >= 50 ? 'Good effort!' : 'Keep at it!';
+  const nextDue = countDue();
+  document.getElementById('resultsScore').innerHTML =
+    `<span>${srCorrect}</span> / ${total} reviewed &nbsp;·&nbsp; <span>${pct}%</span><br>` +
+    `<span style="color:var(--accent2);font-size:0.82rem">${nextDue > 0 ? `${nextDue} card${nextDue>1?'s':''} still due today` : 'All caught up for today! 🎉'}</span>`;
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('resultsScreen').classList.add('active');
+  document.querySelector('.nav-title').innerHTML = `<button class="back-btn" onclick="goHome()">← Home</button>`;
+  // refresh due count on home when they go back
+}
+
+// Update due badge on home screen
+function updateDueBadge() {
+  const n = countDue();
+  const badge = document.getElementById('dueBadge');
+  const btn = document.getElementById('reviewBtn');
+  if (!badge || !btn) return;
+  badge.textContent = n;
+  if (n === 0) {
+    btn.classList.add('none');
+    badge.style.display = 'none';
+  } else {
+    btn.classList.remove('none');
+    badge.style.display = '';
+  }
+}
+
+// Initialize SR fields on all existing cards that don't have them
+function initSRFields() {
+  let changed = false;
+  decks.forEach(deck => {
+    deck.cards.forEach(card => {
+      if (card.sr_due === undefined) {
+        card.sr_due = todayStart(); // due today — show up in first session
+        card.sr_interval = 1;
+        card.sr_ease = 2.5;
+        card.sr_reps = 0;
+        changed = true;
+      }
+    });
+  });
+  if (changed) save();
+}
+
 // ════════ SHUFFLE ════════
 function toggleShuffle() {
   shuffleOn = !shuffleOn;
@@ -1136,10 +1559,10 @@ function showFlashCard() {
   const qLen = card.q.length;
   const fontSize = qLen > 80 ? '0.9rem' : qLen > 50 ? '1rem' : qLen > 30 ? '1.1rem' : '1.25rem';
 
-  document.getElementById('flashQuestion').textContent = card.q;
+  document.getElementById('flashQuestion').textContent = getCardQ(card);
   document.getElementById('flashQuestion').style.fontSize = fontSize;
-  document.getElementById('flashAnswer').textContent = card.a;
-  const aLen = card.a.length;
+  document.getElementById('flashAnswer').textContent = getCardA(card);
+  const aLen = getCardA(card).length;
   const aFontSize = aLen > 80 ? '0.9rem' : aLen > 50 ? '1rem' : aLen > 30 ? '1.1rem' : '1.25rem';
   document.getElementById('flashAnswer').style.fontSize = aFontSize;
 
@@ -1158,13 +1581,14 @@ function flipCard() {
 
 function markCard(correct) {
   const card = studyQueue[studyIndex];
-  // Persist score to the actual card in the deck
   card.seen = (card.seen || 0) + 1;
   if (correct) {
     card.correct = (card.correct || 0) + 1;
     studyCorrect++;
   }
   save();
+  addTodayReviewed(1);
+  updateGoalRing();
   document.getElementById('flashActions').style.display = 'none';
   if (studyIndex < studyQueue.length - 1) {
     studyIndex++;
@@ -1237,6 +1661,8 @@ function answerMC(btn, correct) {
     });
   }
   save();
+  addTodayReviewed(1);
+  updateGoalRing();
   document.getElementById('mcNextBtn').classList.add('visible');
 }
 
@@ -1251,15 +1677,37 @@ function showResults() {
   const total = studyQueue.length;
   const pct = Math.round((studyCorrect / total) * 100);
   const newlyLearned = studyQueue.filter(c => (c.correct || 0) === LEARNED_THRESHOLD).length;
+
+  // Handle challenge completion
+  if (pendingChallengeComplete) {
+    pendingChallengeComplete = false;
+    localStorage.setItem('fd_challenge_date', new Date().toDateString());
+    updateChallengeBtn();
+  }
+
   document.getElementById('resultsEmoji').textContent = pct >= 80 ? '🎉' : pct >= 50 ? '💪' : '📚';
   document.getElementById('resultsTitle').textContent = pct >= 80 ? 'Excellent!' : pct >= 50 ? 'Good effort!' : 'Keep studying!';
   let scoreHTML = `<span>${studyCorrect}</span> / ${total} correct &nbsp;·&nbsp; <span>${pct}%</span>`;
   if (newlyLearned > 0) scoreHTML += `<br><span style="color:var(--accent);font-size:0.85rem">+${newlyLearned} newly learned! 🌟</span>`;
+
+  // Goal progress
+  const goal = getGoal();
+  const reviewed = getTodayReviewed();
+  if (goal > 0) {
+    const goalPct = Math.min(100, Math.round((reviewed / goal) * 100));
+    scoreHTML += `<br><span style="color:var(--accent2);font-size:0.8rem">Daily goal: ${reviewed}/${goal} (${goalPct}%)${reviewed >= goal ? ' ✅' : ''}</span>`;
+  }
+
   document.getElementById('resultsScore').innerHTML = scoreHTML;
   document.querySelectorAll('.screen, #flashScreen, #mcScreen').forEach(s => s.classList.remove('active'));
   document.getElementById('resultsScreen').classList.add('active');
-  const deck = getDeck(currentDeckId);
-  document.querySelector('.nav-title').innerHTML = `<button class="back-btn" onclick="openDeck('${currentDeckId}')">← ${deck.name}</button>`;
+
+  // Back button depends on context
+  const backLabel = isMixedSession ? '← Home' : currentDeckId ? `← ${getDeck(currentDeckId)?.name || 'Deck'}` : '← Home';
+  const backFn = isMixedSession || !currentDeckId ? 'goHome()' : `openDeck('${currentDeckId}')`;
+  document.querySelector('.nav-title').innerHTML = `<button class="back-btn" onclick="${backFn}">${backLabel}</button>`;
+  document.getElementById('addDeckBtn').style.display = 'none';
+  document.getElementById('importNavBtn').style.display = 'none';
 }
 
 function retrySession() {
@@ -1283,20 +1731,31 @@ function resetDeckScores() {
     tx = e.touches[0].clientX; ty = e.touches[0].clientY; tt = Date.now();
   }, { passive: true });
   document.addEventListener('touchend', e => {
-    if (!document.getElementById('flashScreen').classList.contains('active')) return;
-    if (!isFlipped) return;
+    const flashActive = document.getElementById('flashScreen').classList.contains('active');
+    const srActive = document.getElementById('srScreen').classList.contains('active');
+    if (!flashActive && !srActive) return;
+    if (flashActive && !isFlipped) return;
+    if (srActive && !srIsFlipped) return;
+
     const dx = e.changedTouches[0].clientX - tx;
     const dy = e.changedTouches[0].clientY - ty;
     const dt = Date.now() - tt;
     if (Math.abs(dx) < 60 || Math.abs(dy) > Math.abs(dx) * 0.8 || dt > 500) return;
-    const fc = document.getElementById('flipCard');
-    fc.style.transition = 'transform 0.18s ease, opacity 0.18s ease';
-    fc.style.transform = `rotateY(180deg) translateX(${dx > 0 ? 70 : -70}px) rotate(${dx > 0 ? -6 : 6}deg)`;
-    fc.style.opacity = '0';
-    setTimeout(() => {
-      fc.style.transition = ''; fc.style.transform = ''; fc.style.opacity = '';
-      markCard(dx > 0);
-    }, 180);
+
+    if (flashActive) {
+      const fc = document.getElementById('flipCard');
+      fc.style.transition = 'transform 0.18s ease, opacity 0.18s ease';
+      fc.style.transform = `rotateY(180deg) translateX(${dx > 0 ? 70 : -70}px) rotate(${dx > 0 ? -6 : 6}deg)`;
+      fc.style.opacity = '0';
+      setTimeout(() => { fc.style.transition=''; fc.style.transform=''; fc.style.opacity=''; markCard(dx > 0); }, 180);
+    } else {
+      // SR: right=easy(3), left=hard(1)
+      const fc = document.getElementById('srFlipCard');
+      fc.style.transition = 'transform 0.18s ease, opacity 0.18s ease';
+      fc.style.transform = `rotateY(180deg) translateX(${dx > 0 ? 70 : -70}px) rotate(${dx > 0 ? -6 : 6}deg)`;
+      fc.style.opacity = '0';
+      setTimeout(() => { fc.style.transition=''; fc.style.transform=''; fc.style.opacity=''; rateSR(dx > 0 ? 3 : 1); }, 180);
+    }
   }, { passive: true });
 })();
 
@@ -1316,8 +1775,224 @@ document.addEventListener('keydown', e => {
   }
 });
 
+// ════════ REVERSE MODE ════════
+let reverseMode = false;
+
+function toggleReverse() {
+  reverseMode = !reverseMode;
+  const toggle = document.getElementById('reverseToggle');
+  const label = document.getElementById('reverseLabel');
+  if (toggle) toggle.classList.toggle('on', reverseMode);
+  if (label) label.textContent = reverseMode ? 'Reverse mode' : 'Normal mode';
+  toast(reverseMode ? '↔️ Reverse: English → Portuguese' : '↔️ Normal: Portuguese → English');
+}
+
+function getCardQ(card) { return reverseMode ? card.a : card.q; }
+function getCardA(card) { return reverseMode ? card.q : card.a; }
+
+// ════════ DAILY GOAL ════════
+function getGoal() { return parseInt(localStorage.getItem('fd_goal') || '0'); }
+function getTodayReviewed() {
+  const today = new Date().toDateString();
+  const data = JSON.parse(localStorage.getItem('fd_today_reviewed') || '{"date":"","count":0}');
+  if (data.date !== today) return 0;
+  return data.count;
+}
+function addTodayReviewed(n) {
+  const today = new Date().toDateString();
+  const data = JSON.parse(localStorage.getItem('fd_today_reviewed') || '{"date":"","count":0}');
+  const count = data.date === today ? data.count + n : n;
+  localStorage.setItem('fd_today_reviewed', JSON.stringify({ date: today, count }));
+}
+
+function updateGoalRing() {
+  const goal = getGoal();
+  const reviewed = getTodayReviewed();
+  const pct = goal > 0 ? Math.min(1, reviewed / goal) : 0;
+  const circumference = 132;
+  const offset = circumference - pct * circumference;
+  const fill = document.getElementById('goalRingFill');
+  const text = document.getElementById('goalRingText');
+  if (fill) fill.style.strokeDashoffset = offset;
+  if (text) {
+    if (goal === 0) { text.textContent = '—'; text.style.fontSize = '0.65rem'; }
+    else { text.textContent = `${reviewed}/${goal}`; text.style.fontSize = reviewed >= 10 ? '0.55rem' : '0.65rem'; }
+  }
+}
+
+function openGoalModal() {
+  const g = getGoal();
+  document.getElementById('goalInput').value = g || '';
+  document.getElementById('goalModal').classList.add('active');
+}
+function closeGoalModal() { document.getElementById('goalModal').classList.remove('active'); }
+function setGoal(n) {
+  document.getElementById('goalInput').value = n;
+}
+function saveGoal() {
+  const n = parseInt(document.getElementById('goalInput').value);
+  if (!n || n < 1) { toast('Enter a valid number'); return; }
+  localStorage.setItem('fd_goal', n);
+  closeGoalModal();
+  updateGoalRing();
+  toast(`Daily goal set to ${n} cards`);
+}
+
+// ════════ DAILY CHALLENGE ════════
+function getDailyChallengeCards() {
+  // Seed based on today's date so it's consistent all day
+  const seed = new Date().toDateString();
+  let hash = 0;
+  for (let i = 0; i < seed.length; i++) hash = (hash * 31 + seed.charCodeAt(i)) | 0;
+  const rng = (n) => { hash = (hash * 1664525 + 1013904223) | 0; return Math.abs(hash) % n; };
+
+  const all = [];
+  decks.forEach(d => d.cards.forEach(c => all.push({ card: c, deck: d })));
+  if (all.length === 0) return [];
+
+  // Pick 20 cards deterministically from today's seed
+  const count = Math.min(20, all.length);
+  const picked = [];
+  const used = new Set();
+  let attempts = 0;
+  while (picked.length < count && attempts < all.length * 3) {
+    const idx = rng(all.length);
+    if (!used.has(idx)) { used.add(idx); picked.push(all[idx]); }
+    attempts++;
+  }
+  return picked;
+}
+
+function wasChallengeCompletedToday() {
+  return localStorage.getItem('fd_challenge_date') === new Date().toDateString();
+}
+
+function updateChallengeBtn() {
+  const btn = document.getElementById('challengeBtn');
+  if (!btn) return;
+  if (wasChallengeCompletedToday()) {
+    btn.classList.add('done');
+    btn.textContent = '✅ Daily Challenge — completed!';
+  } else {
+    btn.classList.remove('done');
+    btn.innerHTML = '🏆 Daily Challenge <span style="font-size:0.75rem;opacity:.7">— 20 random cards</span>';
+  }
+}
+
+function startDailyChallenge() {
+  if (wasChallengeCompletedToday()) { toast('Already completed today! Come back tomorrow 🏆'); return; }
+  const cards = getDailyChallengeCards();
+  if (cards.length === 0) { toast('Add some cards first!'); return; }
+  // Run as a mixed flashcard session
+  studyMode = 'flash';
+  studyQueue = cards.map(({ card }) => card);
+  currentDeckId = null;
+  isMixedSession = true;
+  studyIndex = 0; studyCorrect = 0;
+  updateStreak();
+  showFlashCard();
+  showScreen('flashScreen');
+  document.querySelector('.nav-title').innerHTML = `<button class="back-btn" onclick="goHome()">🏆 Challenge</button>`;
+  document.getElementById('addDeckBtn').style.display = 'none';
+  document.getElementById('importNavBtn').style.display = 'none';
+  // Mark complete when done — hook into showResults
+  pendingChallengeComplete = true;
+}
+
+let pendingChallengeComplete = false;
+
+// ════════ MIXED DECK SESSION ════════
+let selectedMixDecks = new Set();
+let mixMode = 'flash';
+let isMixedSession = false;
+
+function openMixedModal() {
+  if (decks.length === 0) { toast('No decks yet!'); return; }
+  selectedMixDecks = new Set();
+  mixMode = 'flash';
+  setMixMode('flash');
+  const list = document.getElementById('deckPickList');
+  list.innerHTML = decks.map(d => {
+    const s = deckStats(d);
+    return `<div class="deck-pick-item" id="pick_${d.id}" onclick="toggleDeckPick('${d.id}')">
+      <div class="deck-pick-check" id="check_${d.id}"></div>
+      <div>
+        <div class="deck-pick-name">${d.name}</div>
+        <div class="deck-pick-meta">${s.total} cards</div>
+      </div>
+    </div>`;
+  }).join('');
+  document.getElementById('mixedModal').classList.add('active');
+}
+function closeMixedModal() { document.getElementById('mixedModal').classList.remove('active'); }
+
+function toggleDeckPick(id) {
+  if (selectedMixDecks.has(id)) selectedMixDecks.delete(id);
+  else selectedMixDecks.add(id);
+  const item = document.getElementById(`pick_${id}`);
+  const check = document.getElementById(`check_${id}`);
+  if (item) item.classList.toggle('selected', selectedMixDecks.has(id));
+  if (check) check.textContent = selectedMixDecks.has(id) ? '✓' : '';
+}
+
+function selectAllDecks(all) {
+  decks.forEach(d => {
+    if (all) selectedMixDecks.add(d.id);
+    else selectedMixDecks.delete(d.id);
+    const item = document.getElementById(`pick_${d.id}`);
+    const check = document.getElementById(`check_${d.id}`);
+    if (item) item.classList.toggle('selected', all);
+    if (check) check.textContent = all ? '✓' : '';
+  });
+}
+
+function setMixMode(mode) {
+  mixMode = mode;
+  const flash = document.getElementById('mixModeFlash');
+  const quiz = document.getElementById('mixModeQuiz');
+  if (flash) { flash.style.background = mode==='flash'?'var(--accent)':'var(--surface)'; flash.style.color = mode==='flash'?'#0f0f13':'var(--muted)'; flash.style.borderColor = mode==='flash'?'var(--accent)':'var(--border)'; }
+  if (quiz) { quiz.style.background = mode==='quiz'?'var(--accent2)':'var(--surface)'; quiz.style.color = mode==='quiz'?'#0f0f13':'var(--muted)'; quiz.style.borderColor = mode==='quiz'?'var(--accent2)':'var(--border)'; }
+}
+
+function startMixedSession() {
+  if (selectedMixDecks.size === 0) { toast('Select at least one deck'); return; }
+  const allCards = [];
+  selectedMixDecks.forEach(id => {
+    const deck = getDeck(id);
+    if (deck) deck.cards.forEach(c => allCards.push(c));
+  });
+  if (allCards.length === 0) { toast('Selected decks have no cards'); return; }
+  closeMixedModal();
+  isMixedSession = true;
+  currentDeckId = null;
+  studyIndex = 0; studyCorrect = 0;
+  updateStreak();
+  const deckNames = [...selectedMixDecks].map(id => getDeck(id)?.name).filter(Boolean).join(', ');
+  if (mixMode === 'quiz') {
+    if (allCards.length < 2) { toast('Need at least 2 cards for quiz mode'); return; }
+    studyMode = 'mc';
+    studyQueue = shuffle(allCards);
+    showMCQuestion();
+    showScreen('mcScreen');
+    document.querySelector('.nav-title').innerHTML = `<button class="back-btn" onclick="goHome()">← Mixed</button>`;
+  } else {
+    studyMode = 'flash';
+    studyQueue = shuffle(allCards);
+    showFlashCard();
+    showScreen('flashScreen');
+    document.querySelector('.nav-title').innerHTML = `<button class="back-btn" onclick="goHome()">← Mixed</button>`;
+  }
+  document.getElementById('addDeckBtn').style.display = 'none';
+  document.getElementById('importNavBtn').style.display = 'none';
+  toast(`Mixing ${allCards.length} cards from ${selectedMixDecks.size} deck${selectedMixDecks.size>1?'s':''}`);
+}
+
 // ════════ INIT ════════
+initSRFields();
 renderDecks();
+updateDueBadge();
+updateGoalRing();
+updateChallengeBtn();
 </script>
 
 <!-- PWA Service Worker registration -->
