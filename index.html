@@ -632,6 +632,11 @@
       </div>
     </div>
   </div>
+  <div style="display:flex;justify-content:center;margin-bottom:10px">
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:99px;padding:5px 16px;font-size:0.75rem;color:var(--muted)">
+      🔥 Streak: <span id="statStreak" style="color:var(--accent);font-weight:700">0</span> days
+    </div>
+  </div>
 
   <button class="challenge-btn" id="challengeBtn" onclick="openModePicker('challenge')">
     🏆 Daily Challenge
@@ -1079,7 +1084,8 @@ function renderDecks() {
   const gs = globalStats();
   document.getElementById('statTotal').textContent = gs.total;
   document.getElementById('statLearned').textContent = gs.learned;
-  document.getElementById('statStreak').textContent = gs.streak;
+  const streakEl = document.getElementById('statStreak');
+  if (streakEl) streakEl.textContent = gs.streak;
   updateDueBadge();
 
   const grid = document.getElementById('deckGrid');
