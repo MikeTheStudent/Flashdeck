@@ -633,10 +633,10 @@
     </div>
   </div>
 
-  <button class="challenge-btn" id="challengeBtn" onclick="startDailyChallenge()">
+  <button class="challenge-btn" id="challengeBtn" onclick="openModePicker('challenge')">
     🏆 Daily Challenge
   </button>
-  <button class="review-btn" id="reviewBtn" onclick="startSRSession()">
+  <button class="review-btn" id="reviewBtn" onclick="openModePicker('sr')">
     🧠 Review due cards <span class="due-badge" id="dueBadge">0</span>
   </button>
   <button class="surprise-btn" onclick="openMixedModal()">🔀 Mixed deck session</button>
@@ -943,6 +943,39 @@
   </div>
 </div>
 
+<!-- ════════ MODAL: SR / CHALLENGE MODE PICKER ════════ -->
+<div class="modal-overlay" id="modePickerModal">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <h3 id="modePickerTitle">Choose Study Mode</h3>
+    <p style="font-size:0.78rem;color:var(--muted);margin-bottom:20px" id="modePickerSubtitle"></p>
+    <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:8px">
+      <button class="mode-btn primary" style="flex-direction:row;gap:12px;justify-content:flex-start;padding:16px 20px" onclick="confirmModePicker('flash')">
+        <span style="font-size:1.4rem">🃏</span>
+        <div style="text-align:left">
+          <div>Flashcards</div>
+          <div style="font-size:0.72rem;font-weight:400;opacity:.7">Flip cards, rate Got it / Again</div>
+        </div>
+      </button>
+      <button class="mode-btn secondary" style="flex-direction:row;gap:12px;justify-content:flex-start;padding:16px 20px" onclick="confirmModePicker('mc')">
+        <span style="font-size:1.4rem">🎯</span>
+        <div style="text-align:left">
+          <div>Multiple Choice</div>
+          <div style="font-size:0.72rem;font-weight:400;opacity:.7">Pick the correct answer from 4 options</div>
+        </div>
+      </button>
+      <button class="mode-btn" style="flex-direction:row;gap:12px;justify-content:flex-start;padding:16px 20px;border-color:#a78bfa;color:#a78bfa" onclick="confirmModePicker('sr')">
+        <span style="font-size:1.4rem">🧠</span>
+        <div style="text-align:left">
+          <div>Spaced Review</div>
+          <div style="font-size:0.72rem;font-weight:400;opacity:.7">Rate difficulty, cards schedule themselves</div>
+        </div>
+      </button>
+    </div>
+    <button class="modal-btn ghost" style="width:100%;margin-top:8px" onclick="closeModePickerModal()">Cancel</button>
+  </div>
+</div>
+
 <!-- Toast -->
 <div class="toast" id="toast"></div>
 
@@ -1007,11 +1040,18 @@ function toast(msg) {
 // ════════ NAVIGATION ════════
 function showScreen(id) {
   document.querySelectorAll('.screen, .results-screen').forEach(s => s.classList.remove('active'));
-  document.getElementById(id).classList.add('active');
-  // Show/hide nav actions
+  const target = document.getElementById(id);
+  if (target) target.classList.add('active');
   const isHome = id === 'homeScreen';
   document.getElementById('addDeckBtn').style.display = isHome ? '' : 'none';
   document.getElementById('importNavBtn').style.display = isHome ? '' : 'none';
+}
+
+function setNav(backLabel, backFn) {
+  document.querySelector('.nav-title').innerHTML =
+    `<button class="back-btn" onclick="${backFn}">${backLabel}</button>`;
+  document.getElementById('addDeckBtn').style.display = 'none';
+  document.getElementById('importNavBtn').style.display = 'none';
 }
 
 function goHome() {
@@ -1091,9 +1131,7 @@ function openDeck(id) {
   renderCardList(deck);
   resetNav();
   showScreen('deckScreen');
-  document.querySelector('.nav-title').innerHTML = `<button class="back-btn" onclick="goHome()">← Decks</button>`;
-  document.getElementById('addDeckBtn').style.display = 'none';
-  document.getElementById('importNavBtn').style.display = 'none';
+  setNav('← Decks', 'goHome()');
 }
 
 function updateDeckMeta(deck) {
@@ -1402,17 +1440,37 @@ let srIndex = 0;
 let srCorrect = 0;
 let srIsFlipped = false;
 
-function startSRSession() {
+function startSRSession(mode = 'sr') {
   const due = getDueCards();
   if (due.length === 0) { toast('No cards due today! Come back tomorrow 🎉'); return; }
-  srQueue = shuffle(due); // shuffle so not always same order
-  srIndex = 0; srCorrect = 0; srIsFlipped = false;
   updateStreak();
-  showSRCard();
-  showScreen('srScreen');
-  document.querySelector('.nav-title').innerHTML = `<button class="back-btn" onclick="goHome()">← Home</button>`;
-  document.getElementById('addDeckBtn').style.display = 'none';
-  document.getElementById('importNavBtn').style.display = 'none';
+  isMixedSession = false;
+  currentDeckId = null;
+
+  if (mode === 'sr') {
+    srQueue = shuffle(due);
+    srIndex = 0; srCorrect = 0; srIsFlipped = false;
+    showSRCard();
+    showScreen('srScreen');
+    setNav('← Home', 'goHome()');
+  } else if (mode === 'flash') {
+    studyMode = 'flash';
+    studyQueue = shuffle(due.map(d => d.card));
+    studyIndex = 0; studyCorrect = 0;
+    isMixedSession = true;
+    showFlashCard();
+    showScreen('flashScreen');
+    setNav('← Home', 'goHome()');
+  } else if (mode === 'mc') {
+    if (due.length < 2) { toast('Need at least 2 due cards for quiz mode'); return; }
+    studyMode = 'mc';
+    studyQueue = shuffle(due.map(d => d.card));
+    studyIndex = 0; studyCorrect = 0;
+    isMixedSession = true;
+    showMCQuestion();
+    showScreen('mcScreen');
+    setNav('← Home', 'goHome()');
+  }
 }
 
 function showSRCard() {
@@ -1486,7 +1544,7 @@ function showSRResults() {
     `<span style="color:var(--accent2);font-size:0.82rem">${nextDue > 0 ? `${nextDue} card${nextDue>1?'s':''} still due today` : 'All caught up for today! 🎉'}</span>`;
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   document.getElementById('resultsScreen').classList.add('active');
-  document.querySelector('.nav-title').innerHTML = `<button class="back-btn" onclick="goHome()">← Home</button>`;
+  setNav('← Home', 'goHome()');
   // refresh due count on home when they go back
 }
 
@@ -1546,7 +1604,7 @@ function startFlashcards() {
   updateStreak();
   showFlashCard();
   showScreen('flashScreen');
-  document.querySelector('.nav-title').innerHTML = `<button class="back-btn" onclick="openDeck('${currentDeckId}')">← ${deck.name}</button>`;
+  setNav('← ' + (getDeck(currentDeckId)?.name || 'Deck'), `openDeck('${currentDeckId}')`);
 }
 
 function showFlashCard() {
@@ -1622,7 +1680,7 @@ function startMultipleChoice() {
   updateStreak();
   showMCQuestion();
   showScreen('mcScreen');
-  document.querySelector('.nav-title').innerHTML = `<button class="back-btn" onclick="openDeck('${currentDeckId}')">← ${deck.name}</button>`;
+  setNav('← ' + (getDeck(currentDeckId)?.name || 'Deck'), `openDeck('${currentDeckId}')`);
 }
 
 function showMCQuestion() {
@@ -1705,9 +1763,7 @@ function showResults() {
   // Back button depends on context
   const backLabel = isMixedSession ? '← Home' : currentDeckId ? `← ${getDeck(currentDeckId)?.name || 'Deck'}` : '← Home';
   const backFn = isMixedSession || !currentDeckId ? 'goHome()' : `openDeck('${currentDeckId}')`;
-  document.querySelector('.nav-title').innerHTML = `<button class="back-btn" onclick="${backFn}">${backLabel}</button>`;
-  document.getElementById('addDeckBtn').style.display = 'none';
-  document.getElementById('importNavBtn').style.display = 'none';
+  setNav(backLabel, backFn);
 }
 
 function retrySession() {
@@ -1774,6 +1830,37 @@ document.addEventListener('keydown', e => {
     if (e.key === 'ArrowLeft' && isFlipped) markCard(false);
   }
 });
+
+// ════════ MODE PICKER ════════
+let modePickerContext = null; // 'sr' | 'challenge'
+
+function openModePicker(context) {
+  modePickerContext = context;
+  const title = document.getElementById('modePickerTitle');
+  const sub = document.getElementById('modePickerSubtitle');
+  if (context === 'sr') {
+    const n = countDue();
+    title.textContent = '🧠 Review Due Cards';
+    sub.textContent = `${n} card${n !== 1 ? 's' : ''} due today — choose how to study them`;
+  } else {
+    title.textContent = '🏆 Daily Challenge';
+    sub.textContent = '20 random cards from across all your decks';
+  }
+  document.getElementById('modePickerModal').classList.add('active');
+}
+
+function closeModePickerModal() {
+  document.getElementById('modePickerModal').classList.remove('active');
+}
+
+function confirmModePicker(mode) {
+  closeModePickerModal();
+  if (modePickerContext === 'sr') {
+    startSRSession(mode);
+  } else {
+    startDailyChallenge(mode);
+  }
+}
 
 // ════════ REVERSE MODE ════════
 let reverseMode = false;
@@ -1879,24 +1966,37 @@ function updateChallengeBtn() {
   }
 }
 
-function startDailyChallenge() {
+function startDailyChallenge(mode = 'flash') {
   if (wasChallengeCompletedToday()) { toast('Already completed today! Come back tomorrow 🏆'); return; }
   const cards = getDailyChallengeCards();
   if (cards.length === 0) { toast('Add some cards first!'); return; }
-  // Run as a mixed flashcard session
-  studyMode = 'flash';
-  studyQueue = cards.map(({ card }) => card);
-  currentDeckId = null;
   isMixedSession = true;
+  currentDeckId = null;
   studyIndex = 0; studyCorrect = 0;
   updateStreak();
-  showFlashCard();
-  showScreen('flashScreen');
-  document.querySelector('.nav-title').innerHTML = `<button class="back-btn" onclick="goHome()">🏆 Challenge</button>`;
-  document.getElementById('addDeckBtn').style.display = 'none';
-  document.getElementById('importNavBtn').style.display = 'none';
-  // Mark complete when done — hook into showResults
   pendingChallengeComplete = true;
+
+  if (mode === 'sr') {
+    // Build fake SR queue from challenge cards
+    srQueue = cards.map(({ card, deck }) => ({ card, deck }));
+    srIndex = 0; srCorrect = 0; srIsFlipped = false;
+    showSRCard();
+    showScreen('srScreen');
+    setNav('🏆 Challenge', 'goHome()');
+  } else if (mode === 'mc') {
+    if (cards.length < 2) { toast('Need at least 2 cards for quiz mode'); return; }
+    studyMode = 'mc';
+    studyQueue = cards.map(({ card }) => card);
+    showMCQuestion();
+    showScreen('mcScreen');
+    setNav('🏆 Challenge', 'goHome()');
+  } else {
+    studyMode = 'flash';
+    studyQueue = cards.map(({ card }) => card);
+    showFlashCard();
+    showScreen('flashScreen');
+    setNav('🏆 Challenge', 'goHome()');
+  }
 }
 
 let pendingChallengeComplete = false;
@@ -1974,16 +2074,14 @@ function startMixedSession() {
     studyQueue = shuffle(allCards);
     showMCQuestion();
     showScreen('mcScreen');
-    document.querySelector('.nav-title').innerHTML = `<button class="back-btn" onclick="goHome()">← Mixed</button>`;
+    setNav('← Mixed', 'goHome()');
   } else {
     studyMode = 'flash';
     studyQueue = shuffle(allCards);
     showFlashCard();
     showScreen('flashScreen');
-    document.querySelector('.nav-title').innerHTML = `<button class="back-btn" onclick="goHome()">← Mixed</button>`;
+    setNav('← Mixed', 'goHome()');
   }
-  document.getElementById('addDeckBtn').style.display = 'none';
-  document.getElementById('importNavBtn').style.display = 'none';
   toast(`Mixing ${allCards.length} cards from ${selectedMixDecks.size} deck${selectedMixDecks.size>1?'s':''}`);
 }
 
