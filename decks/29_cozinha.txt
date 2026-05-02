@@ -1,0 +1,40 @@
+O frigorífico | Fridge
+O esquentador | Water heater / Boiler
+O armário de cozinha | Kitchen cupboard
+O micro-ondas | Microwave
+O exaustor | Extractor fan / Range hood
+A prateleira | Shelf
+O guarda-louça | Crockery cupboard / Dresser
+O avental | Apron
+A torradeira | Toaster
+A chaleira | Kettle
+A máquina de café | Coffee machine
+O tacho | Pot / Saucepan
+A panela | Pan / Cooking pot
+A frigideira | Frying pan
+O fogão | Stove / Hob
+O forno | Oven
+A torneira | Tap / Faucet
+O detergente | Washing-up liquid / Detergent
+A esponja | Sponge
+A máquina de lavar louça | Dishwasher
+O lava-louça | Kitchen sink
+A bancada | Worktop / Counter
+A gaveta | Drawer
+A máquina de lavar louça | Dishwasher (built-in)
+A tábua de cortar | Cutting board
+O saca-rolhas | Corkscrew
+A varinha mágica | Hand blender / Magic wand blender
+A tigela | Bowl
+O tabuleiro para assar | Baking tray
+O prato | Plate
+O copo | Glass
+O garfo | Fork
+A colher | Spoon
+A faca | Knife
+Os pauzinhos | Chopsticks
+A chávena | Cup / Mug
+A tesoura | Scissors
+O balde do lixo | Rubbish bin / Trash can
+O íman | Magnet (fridge magnet)
+A máquina de lavar roupa | Washing machine
